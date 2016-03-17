@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset=utf-8>
+		<title>bomb the room</title>
+		<style>
+			body { margin: 0; overflow: hidden;}
+			canvas { width: 100%; height: 100%}
+		#cursor{
+			background: black;
+			width: 10px;
+			height: 10px;
+			position: absolute;
+			top: calc(50% - 5px);
+			left: calc(50% - 5px);
+		}
+		</style>
+	</head>
+	<body>
+		<script src="js/three.min.js"></script>
+    <script src="js/CanvasTexture.js"></script>
+		<script src="js/PointerLockControls.js"></script>
+    <script src="js/main.js"></script>
+		<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+
+		<script type="text/javascript">
+			var socket = io();
+
+			socket.on("generate car", function(id, isMine, color){
+			    globals.generateCar(id, isMine, color);
+			  });
+			socket.on("remove car", function(id){
+			    globals.removeCar(id);
+			});
+			socket.on("pos", function(x,y,rot,id){
+				globals.updatePos(x,y,rot, id);
+				// console.log(id);
+			});
+		</script>
+
+
+		<div id="cursor"></div>
+
+	</body>
+</html>
