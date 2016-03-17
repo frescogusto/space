@@ -1,19 +1,22 @@
-var fs = require("fs");
+
 var express = require("express");
 var app = express();
 var http = require('http').Server(app);
 var io = require("socket.io")(http);
 var path = require("path");
+var fs = require("fs");
 
 var Canvas = require("canvas");
 var Image = Canvas.Image;
 
 
 
-app.use(express.static(path.join(__dirname, 'public')));
+// app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(__dirname+'/public'));
 app.get('/', function(req,res){
-	res.sendFile(__dirname + "public/index.html");
+	res.sendFile(__dirname + 'public/index.html');
 });
+
 http.listen(4000, function(){
 	console.log("listening on 4000");
 });
@@ -159,7 +162,7 @@ for(var i=0; i<6; i++){
 		// (x,y,brushSize, color)
 		// console.log("someone is drawing at " + x + " " + y + " brush:" + brushSize + " color " + color);
 		walls[wall].draw(x,y,brushSize,color);
-		socket.broadcast.emit("draw", wall,x,y,brushSize,color);
+		socket.broadcast.emit("draw",wall,x,y,brushSize,color);
 	});
 
 	// socket.on("typing", function(name){

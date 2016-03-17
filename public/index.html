@@ -14,11 +14,14 @@
 			top: calc(50% - 5px);
 			left: calc(50% - 5px);
 		}
+		#gui{
+			display: none;
+		}
 		</style>
 	</head>
 	<body>
 		<script src="js/three.min.js"></script>
-    <script src="js/CanvasTexture.js"></script>
+    <script src="js/canvasTexture.js"></script>
 		<script src="js/PointerLockControls.js"></script>
     <script src="js/main.js"></script>
 		<script type="text/javascript" src="/socket.io/socket.io.js"></script>
@@ -26,34 +29,31 @@
 		<script type="text/javascript">
 			var socket = io();
 
-			socket.on("generate car", function(id, isMine, color){
-			    globals.generateCar(id, isMine, color);
-			  });
-			socket.on("remove car", function(id){
-			    globals.removeCar(id);
-			});
-			socket.on("pos", function(x,y,rot,id){
-				globals.updatePos(x,y,rot, id);
-				// console.log(id);
-			});
-
-
 			socket.on("updateWall", function(i,_canvas){
 				can = walls[i].obj.canvas;
 				// console.log(can);
-				console.log(_canvas);
+				// console.log(_canvas);
 				can.loadImage(_canvas);
 			});
 
 			socket.on("draw", function(i,x,y,brushSize,color){
-				console.log("someionedrawing " +i);
+				console.log("someone is drawing on wall " +i);
 				drawOnWall(i,x,y,brushSize,color);
 			});
+
+			// window.addEventListener("beforeunload", function (event) {
+			//   // event.preventDefault();
+			// 	console.log("unloading");
+			// 	socket.close();
+			// });
 
 		</script>
 
 
 		<div id="cursor"></div>
+		<div id="gui">
+			brushsize ZIO
+		</div>
 
 	</body>
 </html>

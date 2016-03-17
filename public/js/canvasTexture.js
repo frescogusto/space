@@ -124,12 +124,16 @@ CanvasTexture.prototype = {
 		halfsize = Math.round(size/2)
 		this._context2D.fillRect(x-halfsize,y-halfsize,size,size);
 
+		this.updateTexture();
+
+	},
+
+	updateTexture: function(){
 		for ( var i = 0; i < this._parentTexture.length; i ++ ) {
 
 			this._parentTexture[ i ].needsUpdate = true;
 
 		}
-
 	},
 
 	loadImage: function(_canvas){
@@ -137,6 +141,10 @@ CanvasTexture.prototype = {
 		// console.log(_canvas);
 		img.src = _canvas;
 		this._context2D.drawImage( img, 0, 0 );
+		this.updateTexture();
+
+		console.log(this);
+
 	}
 
 }
