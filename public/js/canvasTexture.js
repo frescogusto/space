@@ -130,6 +130,13 @@ CanvasTexture.prototype = {
 
 		}
 
+	},
+
+	loadImage: function(_canvas){
+		var img = new Image;
+		// console.log(_canvas);
+		img.src = _canvas;
+		this._context2D.drawImage( img, 0, 0 );
 	}
 
 }

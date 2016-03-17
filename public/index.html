@@ -36,6 +36,20 @@
 				globals.updatePos(x,y,rot, id);
 				// console.log(id);
 			});
+
+
+			socket.on("updateWall", function(i,_canvas){
+				can = walls[i].obj.canvas;
+				// console.log(can);
+				console.log(_canvas);
+				can.loadImage(_canvas);
+			});
+
+			socket.on("draw", function(i,x,y,brushSize,color){
+				console.log("someionedrawing " +i);
+				drawOnWall(i,x,y,brushSize,color);
+			});
+
 		</script>
 
 

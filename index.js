@@ -45,10 +45,10 @@ Wall.prototype.createWall = function(w,h){
 }
 
 Wall.prototype.readImage = function(ctx){
-	fs.readFile(__dirname + '/textures/wall_' + this.number + '.png', function(err, squid){
+	fs.readFile(__dirname + '/textures/wall_' + this.number + '.png', function(err, loadedImg){
 	  if (err) throw err;
 	  img = new Image;
-	  img.src = squid;
+	  img.src = loadedImg;
 		console.log("READ IMAGE " +ctx);
 	  ctx.drawImage(img, 0, 0, img.width, img.height);
 
@@ -69,6 +69,20 @@ Wall.prototype.saveImage = function(){
 		// this.readImage(i);
 		// this.readImage(this.ctx,this.number);
 	});
+}
+
+Wall.prototype.draw = function(x,y,brushSize,color){
+
+	x *= this.canvas.width;
+	y *= this.canvas.height;
+	x = Math.round(x);
+	y = Math.round(y);
+
+	this.ctx.fillStyle = color;
+	size = brushSize;
+	halfsize = Math.round(size/2);
+	this.ctx.fillRect(x-halfsize,y-halfsize,size,size);
+
 }
 
 
@@ -105,11 +119,24 @@ function createWalls(){
 createWalls();
 
 
+setInterval(function(){
+
+for(var i=0; i<6; i++){
+	walls[i].saveImage();
+}
+
+ }, 60000);
 
 io.on("connection", function(socket){
 
-	console.log("USER CONNECTO");
+	console.log("USER CONNECTED");
 	socket.broadcast.emit("user connection", "user conecte");
+
+
+for(var i=0; i<6; i++){
+	socket.emit("updateWall", i,walls[i].canvas.toDataURL());
+	// console.log("CHISSA");
+}
 
 	// if(msgs.length>0){
 	// 	for(var i=0; i<msgs.length; i++){
@@ -126,6 +153,13 @@ io.on("connection", function(socket){
 		io.emit("chat message", name, msg);
 		addMsg(name,msg);
 		// socket.broadcast.emit("chat message", msg);
+	});
+
+	socket.on("draw", function(wall,x,y,brushSize, color){
+		// (x,y,brushSize, color)
+		// console.log("someone is drawing at " + x + " " + y + " brush:" + brushSize + " color " + color);
+		walls[wall].draw(x,y,brushSize,color);
+		socket.broadcast.emit("draw", wall,x,y,brushSize,color);
 	});
 
 	// socket.on("typing", function(name){

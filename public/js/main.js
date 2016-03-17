@@ -19,38 +19,54 @@ var drawColor = "black";
 var spd = 100.0;
 var offset = 0.1;
 
+var walls = [];
+
 // front wall
 var plane = new CanvasPlane(roomWidth,roomHeight).plane;
 plane.position.set(0,0,-roomDepth/2);
+plane.number = 0;
 scene.add( plane );
+walls.push(plane);
+// console.log(plane);
 // back wall
 var plane = new CanvasPlane(roomWidth,roomHeight).plane;
 plane.position.set(0,0,roomDepth/2);
 plane.rotation.set(0,Math.PI,0);
+plane.number = 1;
 scene.add( plane );
+walls.push(plane);
 
 // left wall
 var plane = new CanvasPlane(roomDepth,roomHeight).plane;
 plane.position.set(-roomWidth/2,0,0);
 plane.rotation.set(0,Math.PI/2,0);
+plane.number = 2;
 scene.add( plane );
+walls.push(plane);
 // right wall
 var plane = new CanvasPlane(roomDepth,roomHeight).plane;
 plane.position.set(roomWidth/2,0,0);
 plane.rotation.set(0,-Math.PI/2,0);
+plane.number = 3;
 scene.add( plane );
+walls.push(plane);
 
 // ceiling
 var plane = new CanvasPlane(roomWidth,roomDepth).plane;
 plane.position.set(0,roomHeight/2,0);
 plane.rotation.set(Math.PI/2,0,0);
+plane.number = 4;
 scene.add( plane );
+walls.push(plane);
 // floor
 var plane = new CanvasPlane(roomWidth,roomDepth).plane;
 plane.position.set(0,-roomHeight/2,0);
 plane.rotation.set(-Math.PI/2,0,0);
+plane.number = 5;
 scene.add( plane );
+walls.push(plane);
 
+// console.log(walls[0]);
 // plane = new CanvasPlane(4,2).plane;
 // plane.position.set(-2,0,2);
 // plane.rotation.set(0,Math.PI/2,0);
@@ -183,7 +199,6 @@ console.log(event.keyCode);
 
 controls.getObject().position.set(0,-roomHeight/2 +1,0);
 
-
 // var map = new THREE.TextureLoader().load( "cursor.png" );
 // var material = new THREE.SpriteMaterial( { map: map, color: 0xffffff, fog: false } );
 // cursor = new THREE.Sprite( material );
@@ -214,11 +229,18 @@ function drawAtPoint(event){
 		// intersects[ i ].object.obj.canvas.setCrossPosition( uv.x, uv.y, brushSize);
 		intersects[ i ].object.obj.canvas._draw( uv.x, uv.y, brushSize, drawColor);
 
+		num = intersects[i].object.number; // intersected wall number
+
+		socket.emit("draw",num,uv.x,uv.y,brushSize,drawColor);
+
 		// sphere.position.set(intersects[ i ].point.x,intersects[ i ].point.y,intersects[ i ].point.z);
 
 	}
 }
 
+function drawOnWall(i, x,y,brushSize,color){
+	walls[i].obj.canvas._draw(x,y,brushSize,color);
+}
 
 function onDocumentMouseDown(event){
 	isDown = true;
