@@ -88,10 +88,14 @@ walls.push(plane);
 // plane.rotation.set(Math.PI/2,0,0);
 // scene.add( plane );
 
-// var geometry = new THREE.PlaneGeometry( 5, 20, 32 );
-// var material = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} );
-// var cursorPlane = new THREE.Mesh( geometry, material );
-// scene.add( cursorPlane );
+var geometry = new THREE.PlaneGeometry( 1,1);
+var material = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} );
+material.polygonOffset = true;
+material.depthTest = true;
+material.polygonOffsetFactor = -1; // fix z-fighting
+material.polygonOffsetUnits = 0.1;
+var cursorPlane = new THREE.Mesh( geometry, material );
+scene.add( cursorPlane );
 
 // var sphere = new THREE.Mesh( new THREE.SphereGeometry(0.1,8,8), new THREE.MeshBasicMaterial( { color: 0xff0000 } ));
 // scene.add(sphere);
@@ -126,12 +130,10 @@ console.log(event.keyCode);
 						switch ( event.keyCode ) {
 
 							case 79:
-								brushSize -= 1;
-								if(brushSize < 1)
-									brushSize = 1;
+								changeBrushSize(-1);
 								break;
 							case 80:
-								brushSize += 1;
+								changeBrushSize(1);
 								break;
 							case 49:
 								changeColor("white");
@@ -220,6 +222,7 @@ console.log(event.keyCode);
 					window.addEventListener( 'resize', onWindowResize, false );
 
 controls.getObject().position.set(0,-roomHeight/2 +1,0);
+changeBrushSize(0);
 
 // var map = new THREE.TextureLoader().load( "cursor.png" );
 // var material = new THREE.SpriteMaterial( { map: map, color: 0xffffff, fog: false } );
@@ -242,7 +245,7 @@ function drawAtPoint(event){
 	// update the picking ray with the camera and mouse position
 	raycaster.setFromCamera( mouse, camera );
 	// calculate objects intersecting the picking ray
-	var intersects = raycaster.intersectObjects( scene.children );
+	var intersects = raycaster.intersectObjects( walls );
 
 	for ( var i = 0; i < intersects.length; i++ ) {
 		var uv = intersects[ i ].uv;
@@ -250,8 +253,11 @@ function drawAtPoint(event){
 		intersects[i].object.material.map.transformUv( uv );
 		// intersects[ i ].object.obj.canvas.setCrossPosition( uv.x, uv.y, brushSize);
 		// intersects[ i ].object.obj.canvas._draw( uv.x, uv.y, brushSize, drawColor);
-
 		num = intersects[i].object.number; // intersected wall number
+
+		console.log(intersects[i]);
+		// face.normal
+		updateCursorPlane(intersects[i].point, intersects[i].object.rotation);
 
 		if(cursorLocked){
 			drawOnWall(num,uv.x,uv.y,brushSize,drawColor);
@@ -263,9 +269,47 @@ function drawAtPoint(event){
 	}
 }
 
+function updateRaycast(){
+
+	raycaster.setFromCamera( mouse, camera );
+	var intersects = raycaster.intersectObjects( walls );
+
+	for ( var i = 0; i < intersects.length; i++ ) {
+		// console.log(intersects[i]);
+		updateCursorPlane(intersects[i].point, intersects[i].object.rotation);
+
+		if(cursorLocked && isDown){
+			num = intersects[i].object.number; // intersected wall number
+
+			var uv = intersects[ i ].uv;
+			intersects[i].object.material.map.transformUv( uv );
+
+			drawOnWall(num,uv.x,uv.y,brushSize,drawColor);
+			socket.emit("draw",num,uv.x,uv.y,brushSize,drawColor);
+		}
+	}
+
+}
+
+function updateCursorPlane(point, rot){
+	// cursorPlane.position.set(point.x,point.y,point.z);
+	cursorPlane.position.set(Math.round(point.x*64)/64,Math.round(point.y*64)/64,Math.round(point.z*64)/64);
+	cursorPlane.rotation.set(rot.x,rot.y,rot.z);
+}
+
+function changeBrushSize(offset){
+	brushSize += offset;
+	if(brushSize<1)
+	brushSize = 1;
+
+	cursorPlane.scale.set(brushSize/64,brushSize/64,brushSize/64);
+}
+
 function drawOnWall(i, x,y,brushSize,color){
 	walls[i].obj.canvas._draw(x,y,brushSize,color);
 }
+
+
 
 function onDocumentMouseDown(event){
 	isDown = true;
@@ -288,9 +332,12 @@ var render = function () {
 	// cube.rotation.y += 0.01;
 	// t += 0.01;
 	// plane.rotation.y = Math.sin(t);
-	if(isDown){
-		drawAtPoint();
-	}
+	// if(isDown){
+	// 	drawAtPoint();
+	// }
+
+updateRaycast();
+
 // controls.getObject().position.set(0,0,0);
 
 	var time = performance.now();
@@ -364,6 +411,9 @@ function onWindowResize() {
 				camera.aspect = window.innerWidth / window.innerHeight;
 				camera.updateProjectionMatrix();
 				renderer.setSize( window.innerWidth, window.innerHeight );
+
+				mouse.x = ( window.innerWidth*0.5 / window.innerWidth ) * 2 - 1;
+				mouse.y = - ( window.innerHeight*0.5 / window.innerHeight ) * 2 + 1;
 				// document.getElementById("cursor").style.top = window.innerHeight/2;
 				// document.getElementById("cursor").style.left = window.innerWidth/2;
 
@@ -491,8 +541,9 @@ function lockPointer(){
 }
 
 function changeColor(col){
-	col = "#"+col;
-	drawColor = col;
-	document.getElementById("cursor").style.backgroundColor = col;
+	drawColor = "#"+col;
+	cursorPlane.material.color = new THREE.Color(parseInt("0x"+col));
+	// console.log(color);
+	// document.getElementById("cursor").style.backgroundColor = col;
 }
 // lockPointer();
