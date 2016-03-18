@@ -1,6 +1,6 @@
 {
-  "name": "bombtheroom",
-  "version": "1.0.0",
+  "name": "superinternet.space",
+  "version": "0.0.1",
   "description": "3d multiplayer disegnator",
   "main": "index.js",
   "scripts": {

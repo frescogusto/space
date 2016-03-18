@@ -8,6 +8,7 @@ document.body.appendChild( renderer.domElement );
 
 var isDown = false;
 // var cursor;
+var cursorLocked = false;
 
 var roomWidth = 8;
 var roomHeight = 4;
@@ -87,7 +88,12 @@ walls.push(plane);
 // plane.rotation.set(Math.PI/2,0,0);
 // scene.add( plane );
 
-var sphere = new THREE.Mesh( new THREE.SphereGeometry(0.1,8,8), new THREE.MeshBasicMaterial( { color: 0xff0000 } ));
+// var geometry = new THREE.PlaneGeometry( 5, 20, 32 );
+// var material = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} );
+// var cursorPlane = new THREE.Mesh( geometry, material );
+// scene.add( cursorPlane );
+
+// var sphere = new THREE.Mesh( new THREE.SphereGeometry(0.1,8,8), new THREE.MeshBasicMaterial( { color: 0xff0000 } ));
 // scene.add(sphere);
 // sphere.position.set(0,0,0);
 // camera.position.z = 5;
@@ -128,25 +134,25 @@ console.log(event.keyCode);
 								brushSize += 1;
 								break;
 							case 49:
-								drawColor = "white";
+								changeColor("white");
 								break;
 							case 50:
-								drawColor = "black";
+								changeColor("black");
 								break;
 							case 51:
-								drawColor = "red";
+								changeColor("red");
 								break;
 							case 52:
-								drawColor = "rgb(0,255,0)";
+								changeColor("rgb(0,255,0)");
 								break;
 							case 53:
-								drawColor = "rgb(0,0,255)";
+								changeColor("rgb(0,0,255)");
 								break;
 							case 54:
-								drawColor = "rgb(255,255,0)";
+								changeColor("rgb(255,255,0)");
 								break;
 							case 55:
-								drawColor = "rgb(0,255,255)";
+								changeColor("rgb(0,255,255)");
 								break;
 
 							case 67:
@@ -241,13 +247,16 @@ function drawAtPoint(event){
 	for ( var i = 0; i < intersects.length; i++ ) {
 		var uv = intersects[ i ].uv;
 		// console.log(intersects[ i ].object);
-		intersects[ i ].object.material.map.transformUv( uv );
+		intersects[i].object.material.map.transformUv( uv );
 		// intersects[ i ].object.obj.canvas.setCrossPosition( uv.x, uv.y, brushSize);
-		intersects[ i ].object.obj.canvas._draw( uv.x, uv.y, brushSize, drawColor);
+		// intersects[ i ].object.obj.canvas._draw( uv.x, uv.y, brushSize, drawColor);
 
 		num = intersects[i].object.number; // intersected wall number
 
-		socket.emit("draw",num,uv.x,uv.y,brushSize,drawColor);
+		if(cursorLocked){
+			drawOnWall(num,uv.x,uv.y,brushSize,drawColor);
+			socket.emit("draw",num,uv.x,uv.y,brushSize,drawColor);
+		}
 
 		// sphere.position.set(intersects[ i ].point.x,intersects[ i ].point.y,intersects[ i ].point.z);
 
@@ -448,6 +457,7 @@ document.addEventListener( 'click', function ( event ) {
 	controls.enabled = true;
 	gui.style.display = "none";
 	document.getElementById('colorpicker').jscolor.hide();
+	cursorLocked = true;
 });
 
 function lockPointer(){
@@ -464,6 +474,7 @@ function lockPointer(){
 					document.getElementById('colorpicker').jscolor.show();
 
 					console.log("unlocked");
+					cursorLocked = false;
 
 			} else {
 					console.log('The pointer lock status is now unlocked. LOCKING');
@@ -474,6 +485,7 @@ function lockPointer(){
 					document.getElementById('colorpicker').jscolor.hide();
 
 					console.log("now is locked");
+					cursorLocked = true;
 
 			}
 }
