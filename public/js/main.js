@@ -17,6 +17,8 @@ var roomDepth = 8;
 var brushSize = 10;
 var drawColor = "black";
 
+var tool = 0;
+
 var spd = 100.0;
 var offset = 0.1;
 
@@ -157,6 +159,11 @@ console.log(event.keyCode);
 								changeColor("rgb(0,255,255)");
 								break;
 
+							case 73:
+								cursorPlane.scale.set(1/64,1/64,1/64);
+								tool = 1;
+								break;
+
 							case 67:
 								lockPointer();
 								break;
@@ -223,6 +230,7 @@ console.log(event.keyCode);
 
 controls.getObject().position.set(0,-roomHeight/2 +1,0);
 changeBrushSize(0);
+changeColor("000000");
 
 // var map = new THREE.TextureLoader().load( "cursor.png" );
 // var material = new THREE.SpriteMaterial( { map: map, color: 0xffffff, fog: false } );
@@ -234,40 +242,41 @@ init();
 
 
 
-function drawAtPoint(event){
-	// calculate mouse position in normalized device coordinates
-	// (-1 to +1) for both components
-	// mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-	// mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-	mouse.x = ( window.innerWidth*0.5 / window.innerWidth ) * 2 - 1;
-	mouse.y = - ( window.innerHeight*0.5 / window.innerHeight ) * 2 + 1;
+// function drawAtPoint(event){
+// 	// calculate mouse position in normalized device coordinates
+// 	// (-1 to +1) for both components
+// 	// mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+// 	// mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+// 	mouse.x = ( window.innerWidth*0.5 / window.innerWidth ) * 2 - 1;
+// 	mouse.y = - ( window.innerHeight*0.5 / window.innerHeight ) * 2 + 1;
+//
+// 	// update the picking ray with the camera and mouse position
+// 	raycaster.setFromCamera( mouse, camera );
+// 	// calculate objects intersecting the picking ray
+// 	var intersects = raycaster.intersectObjects( walls );
+//
+// 	for ( var i = 0; i < intersects.length; i++ ) {
+// 		var uv = intersects[ i ].uv;
+// 		// console.log(intersects[ i ].object);
+// 		intersects[i].object.material.map.transformUv( uv );
+// 		// intersects[ i ].object.obj.canvas.setCrossPosition( uv.x, uv.y, brushSize);
+// 		// intersects[ i ].object.obj.canvas._draw( uv.x, uv.y, brushSize, drawColor);
+// 		num = intersects[i].object.number; // intersected wall number
+//
+// 		console.log(intersects[i]);
+// 		// face.normal
+// 		updateCursorPlane(intersects[i].point, intersects[i].object.rotation);
+//
+// 		if(cursorLocked){
+// 			drawOnWall(num,uv.x,uv.y,brushSize,drawColor);
+// 			socket.emit("draw",num,uv.x,uv.y,brushSize,drawColor);
+// 		}
+//
+// 		// sphere.position.set(intersects[ i ].point.x,intersects[ i ].point.y,intersects[ i ].point.z);
+//
+// 	}
+// }
 
-	// update the picking ray with the camera and mouse position
-	raycaster.setFromCamera( mouse, camera );
-	// calculate objects intersecting the picking ray
-	var intersects = raycaster.intersectObjects( walls );
-
-	for ( var i = 0; i < intersects.length; i++ ) {
-		var uv = intersects[ i ].uv;
-		// console.log(intersects[ i ].object);
-		intersects[i].object.material.map.transformUv( uv );
-		// intersects[ i ].object.obj.canvas.setCrossPosition( uv.x, uv.y, brushSize);
-		// intersects[ i ].object.obj.canvas._draw( uv.x, uv.y, brushSize, drawColor);
-		num = intersects[i].object.number; // intersected wall number
-
-		console.log(intersects[i]);
-		// face.normal
-		updateCursorPlane(intersects[i].point, intersects[i].object.rotation);
-
-		if(cursorLocked){
-			drawOnWall(num,uv.x,uv.y,brushSize,drawColor);
-			socket.emit("draw",num,uv.x,uv.y,brushSize,drawColor);
-		}
-
-		// sphere.position.set(intersects[ i ].point.x,intersects[ i ].point.y,intersects[ i ].point.z);
-
-	}
-}
 
 function updateRaycast(){
 
@@ -284,8 +293,15 @@ function updateRaycast(){
 			var uv = intersects[ i ].uv;
 			intersects[i].object.material.map.transformUv( uv );
 
-			drawOnWall(num,uv.x,uv.y,brushSize,drawColor);
-			socket.emit("draw",num,uv.x,uv.y,brushSize,drawColor);
+			if(tool == 0){
+				drawOnWall(num,uv.x,uv.y,brushSize,drawColor);
+				socket.emit("draw",num,uv.x,uv.y,brushSize,drawColor);
+			}
+			else if(tool == 1){
+					getPixel(num,uv.x,uv.y);
+			}
+
+
 		}
 	}
 
@@ -293,6 +309,12 @@ function updateRaycast(){
 
 function updateCursorPlane(point, rot){
 	// cursorPlane.position.set(point.x,point.y,point.z);
+	// if(brushSize%2 != 0){
+	// 	// console.log("DISPA");
+	// 	cursorPlane.position.set(Math.round(point.x*64)/64-0.5/64,Math.round(point.y*64)/64,Math.round(point.z*64)/64-0.5/64);
+	// }
+	// else
+
 	cursorPlane.position.set(Math.round(point.x*64)/64,Math.round(point.y*64)/64,Math.round(point.z*64)/64);
 	cursorPlane.rotation.set(rot.x,rot.y,rot.z);
 }
@@ -305,8 +327,35 @@ function changeBrushSize(offset){
 	cursorPlane.scale.set(brushSize/64,brushSize/64,brushSize/64);
 }
 
+
+function changeColor(col){
+	drawColor = "#"+col;
+	cursorPlane.material.color = new THREE.Color(parseInt("0x"+col));
+	// console.log(color);
+	// document.getElementById("cursor").style.backgroundColor = col;
+}
+
 function drawOnWall(i, x,y,brushSize,color){
 	walls[i].obj.canvas._draw(x,y,brushSize,color);
+}
+
+function getPixel(i, x, y){
+
+	pix = walls[i].obj.canvas.getPixel(x,y);
+	col = rgbToHex(pix[0],pix[1],pix[2])
+	console.log(col);
+	changeColor(col);
+	tool = 0;
+	changeBrushSize(0); // resets cursorPlane size
+}
+
+function rgbToHex(r, g, b) {
+    if (r > 255 || g > 255 || b > 255)
+        throw "Invalid color component";
+		if(r<10) r = "0"+r;
+		if(g<10) g = "0"+g;
+		if(b<10) b = "0"+b;
+    return ((r << 16) | (g << 8) | b).toString(16);
 }
 
 
@@ -337,6 +386,7 @@ var render = function () {
 	// }
 
 updateRaycast();
+
 
 // controls.getObject().position.set(0,0,0);
 
@@ -540,10 +590,4 @@ function lockPointer(){
 			}
 }
 
-function changeColor(col){
-	drawColor = "#"+col;
-	cursorPlane.material.color = new THREE.Color(parseInt("0x"+col));
-	// console.log(color);
-	// document.getElementById("cursor").style.backgroundColor = col;
-}
 // lockPointer();

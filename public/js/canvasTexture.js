@@ -38,6 +38,9 @@ CanvasTexture = function ( parentTexture, w, h) {
 						ran = Math.round(Math.random()*200)+55 + j;
 						// ran = Math.round(Math.random()*150)+105 ;
 						// ran = j*Math.sin(i);
+						// ran = i%4 * j%4;
+						// ran = ran *100+200;
+
 						this._context2D.fillStyle = "rgba("+ran+","+ran+","+ran+",255)";
 						this._context2D.fillRect( i, j, 1, 1 );
 					}
@@ -144,6 +147,18 @@ CanvasTexture.prototype = {
 		this.updateTexture();
 
 		console.log(this);
+
+	},
+
+	getPixel: function(x,y){
+
+		x *= this._canvas.width;
+		y *= this._canvas.height;
+		x = Math.round(x);
+		y = Math.round(y);
+		var c = this._context2D.getImageData(x,y,1,1).data;
+		// console.log(c);
+		return c;
 
 	}
 
