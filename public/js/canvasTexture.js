@@ -38,13 +38,15 @@ CanvasTexture = function ( parentTexture, w, h) {
 						ran = Math.round(Math.random()*200)+55 + j;
 						// ran = Math.round(Math.random()*150)+105 ;
 						// ran = j*Math.sin(i);
-						// ran = i%4 * j%4;
-						// ran = ran *100+200;
+						// ran = (i % 2 ? 0 : 1) + (j % 2 ? 0 : 1);
+						// ran = i % 2 * j % 2;
+						// ran = ran * 100 + 200;
 
 						this._context2D.fillStyle = "rgba("+ran+","+ran+","+ran+",255)";
 						this._context2D.fillRect( i, j, 1, 1 );
 					}
 				}
+
 				// this._background.src = "textures/UV_Grid_Sm.jpg";
 
 				this._draw();
@@ -125,7 +127,14 @@ CanvasTexture.prototype = {
 		this._context2D.fillStyle = color;
 		size = brushSize;
 		halfsize = Math.round(size/2)
-		this._context2D.fillRect(x-halfsize,y-halfsize,size,size);
+
+		for(var i=0; i< brushSize; i++){
+			for(var j=0; j< brushSize; j++){
+				if(Math.random() < 0.2)
+				this._context2D.fillRect(x-halfsize+i,y-halfsize+j,1,1);
+			}
+		}
+		// this._context2D.fillRect(x-halfsize,y-halfsize,size,size);
 
 		this.updateTexture();
 
@@ -141,17 +150,15 @@ CanvasTexture.prototype = {
 
 	loadImage: function(_canvas){
 		var img = new Image;
-
-		img.src = _canvas;
-
 		var thisTex = this;
-
-		img.onload = function(){
+		img.onload = function(){ // wait for img to load after setting src -> http://stackoverflow.com/questions/4776670/should-setting-an-image-src-to-data-url-be-available-immediately
 			console.log(thisTex);
 			thisTex._context2D.drawImage( img, 0, 0 );
 			thisTex.updateTexture();
 		}
 		// this.updateTexture();
+
+		img.src = _canvas;
 
 	},
 

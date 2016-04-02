@@ -30,7 +30,6 @@ walls = []; // textures of walls
 // 5 = floor
 
 
-
 Wall = function(w,h,i){ // WALL CLASS
 
 	w = w*64;
@@ -48,8 +47,13 @@ Wall.prototype.createWall = function(w,h){
 }
 
 Wall.prototype.readImage = function(ctx){
+	var t = this;
 	fs.readFile(__dirname + '/textures/wall_' + this.number + '.png', function(err, loadedImg){
-	  if (err) throw err;
+	  if (err) {
+			t.saveImage();
+			// throw err;
+			return;
+		}
 	  img = new Image;
 	  img.src = loadedImg;
 		console.log("READ IMAGE " +ctx);
@@ -111,9 +115,6 @@ function createWalls(){
 	var wall = new Wall(roomWidth,roomDepth,5);
 	walls.push(wall);
 
-	for(var i=0; i<6; i++){
-			// walls[i].readImage(wall.ctx,i);
-	}
 	// console.log(walls);
 	// walls[1].saveImage();
 
@@ -124,7 +125,7 @@ createWalls();
 
 setInterval(function(){
 
-for(var i=0; i<6; i++){
+for(var i=0; i<walls.length; i++){
 	walls[i].saveImage();
 }
 
@@ -133,10 +134,10 @@ for(var i=0; i<6; i++){
 io.on("connection", function(socket){
 
 	console.log("USER CONNECTED");
-	socket.broadcast.emit("user connection", "user conecte");
+	socket.broadcast.emit("user connection", "user connected");
 
 
-for(var i=0; i<6; i++){
+for(var i=0; i<walls.length; i++){
 	socket.emit("updateWall", i,walls[i].canvas.toDataURL());
 	// console.log("CHISSA");
 }
@@ -151,12 +152,12 @@ for(var i=0; i<6; i++){
 		console.log("DISCONNECTOOTOTO");
 	});
 
-	socket.on("chat message", function(name, msg){
-		console.log(msg);
-		io.emit("chat message", name, msg);
-		addMsg(name,msg);
-		// socket.broadcast.emit("chat message", msg);
-	});
+	// socket.on("chat message", function(name, msg){
+	// 	console.log(msg);
+	// 	io.emit("chat message", name, msg);
+	// 	addMsg(name,msg);
+	// 	// socket.broadcast.emit("chat message", msg);
+	// });
 
 	socket.on("draw", function(wall,x,y,brushSize, color){
 		// (x,y,brushSize, color)

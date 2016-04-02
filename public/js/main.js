@@ -91,7 +91,7 @@ walls.push(plane);
 // scene.add( plane );
 
 var geometry = new THREE.PlaneGeometry( 1,1);
-var material = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} );
+var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
 material.polygonOffset = true;
 material.depthTest = true;
 material.polygonOffsetFactor = -1; // fix z-fighting
@@ -309,13 +309,12 @@ function updateRaycast(){
 
 function updateCursorPlane(point, rot){
 	// cursorPlane.position.set(point.x,point.y,point.z);
-	// if(brushSize%2 != 0){
-	// 	// console.log("DISPA");
-	// 	cursorPlane.position.set(Math.round(point.x*64)/64-0.5/64,Math.round(point.y*64)/64,Math.round(point.z*64)/64-0.5/64);
-	// }
-	// else
+	if(brushSize%2 != 0){ // align to pixel when width is odd
+			// console.log(rot);
+	}
 
 	cursorPlane.position.set(Math.round(point.x*64)/64,Math.round(point.y*64)/64,Math.round(point.z*64)/64);
+
 	cursorPlane.rotation.set(rot.x,rot.y,rot.z);
 }
 
@@ -331,6 +330,8 @@ function changeBrushSize(offset){
 function changeColor(col){
 	drawColor = "#"+col;
 	cursorPlane.material.color = new THREE.Color(parseInt("0x"+col));
+	if(document.getElementById("colorpicker"))
+		document.getElementById('colorpicker').jscolor.fromString(col);
 	// console.log(color);
 	// document.getElementById("cursor").style.backgroundColor = col;
 }
@@ -550,7 +551,7 @@ function onWindowResize() {
 	//
 	// }
 document.addEventListener( 'click', function ( event ) {
-	// lockPointer();
+
 	element = document.body;
 	element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
 	element.requestPointerLock();
@@ -558,15 +559,23 @@ document.addEventListener( 'click', function ( event ) {
 	gui.style.display = "none";
 	document.getElementById('colorpicker').jscolor.hide();
 	cursorLocked = true;
+
+	// lockPointer();
+
 });
 
 function lockPointer(){
+
+	var havePointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;
+	if ( havePointerLock ) {
+
 			console.log("pointer lock");
 			element = document.body;
 			gui = document.getElementById("gui");
 			if(document.pointerLockElement === element ||
-				document.mozPointerLockElement === element) {
-					console.log('The pointer lock status is now locked. UNLOCKING');
+				document.mozPointerLockElement === element ||
+				document.webkitPointerLockElement === element) {
+					// console.log('The pointer lock status is now locked. UNLOCKING');
 					document.exitPointerLock = document.exitPointerLock || document.mozExitPointerLock;
 					document.exitPointerLock();
 					controls.enabled = false;
@@ -577,17 +586,24 @@ function lockPointer(){
 					cursorLocked = false;
 
 			} else {
-					console.log('The pointer lock status is now unlocked. LOCKING');
+					// console.log('The pointer lock status is now unlocked. LOCKING');
 					element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
 					element.requestPointerLock();
 					controls.enabled = true;
 					gui.style.display = "none";
 					document.getElementById('colorpicker').jscolor.hide();
 
-					console.log("now is locked");
+					console.log("LOCKED");
 					cursorLocked = true;
 
 			}
+
+	}
+	else {
+		console.log("POINTER LOCK NOT AVAILABLE");
+		// controls.enabled = true;
+	}
+
 }
 
 // lockPointer();
