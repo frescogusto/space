@@ -128,13 +128,13 @@ CanvasTexture.prototype = {
 		size = brushSize;
 		halfsize = Math.round(size/2)
 
-		for(var i=0; i< brushSize; i++){
-			for(var j=0; j< brushSize; j++){
-				if(Math.random() < 0.2)
-				this._context2D.fillRect(x-halfsize+i,y-halfsize+j,1,1);
-			}
-		}
-		// this._context2D.fillRect(x-halfsize,y-halfsize,size,size);
+		// for(var i=0; i< brushSize; i++){
+		// 	for(var j=0; j< brushSize; j++){
+		// 		if(Math.random() < 0.2)
+		// 		this._context2D.fillRect(x-halfsize+i,y-halfsize+j,1,1);
+		// 	}
+		// }
+		this._context2D.fillRect(x-halfsize,y-halfsize,size,size);
 
 		this.updateTexture();
 

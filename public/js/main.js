@@ -138,26 +138,26 @@ console.log(event.keyCode);
 								changeBrushSize(1);
 								break;
 							case 49:
-								changeColor("white");
+								changeColor("ffffff");
 								break;
 							case 50:
-								changeColor("black");
+								changeColor("000000");
 								break;
 							case 51:
-								changeColor("red");
+								changeColor("ff0000");
 								break;
 							case 52:
-								changeColor("rgb(0,255,0)");
+								changeColor("00ff00");
 								break;
 							case 53:
-								changeColor("rgb(0,0,255)");
+								changeColor("0000ff");
 								break;
-							case 54:
-								changeColor("rgb(255,255,0)");
-								break;
-							case 55:
-								changeColor("rgb(0,255,255)");
-								break;
+							// case 54:
+							// 	changeColor("rgb(255,255,0)");
+							// 	break;
+							// case 55:
+							// 	changeColor("rgb(0,255,255)");
+							// 	break;
 
 							case 73:
 								cursorPlane.scale.set(1/64,1/64,1/64);
@@ -328,11 +328,14 @@ function changeBrushSize(offset){
 
 
 function changeColor(col){
+	console.log(col.toString());
 	drawColor = "#"+col;
 	cursorPlane.material.color = new THREE.Color(parseInt("0x"+col));
-	if(document.getElementById("colorpicker"))
-		document.getElementById('colorpicker').jscolor.fromString(col);
-	// console.log(color);
+	if(document.getElementById("colorpicker") ){
+		document.getElementById('colorpicker').jscolor.fromString(col.toString());
+		// console.log(document.getElementById('colorpicker').jscolor);
+	}
+
 	// document.getElementById("cursor").style.backgroundColor = col;
 }
 
@@ -350,13 +353,13 @@ function getPixel(i, x, y){
 	changeBrushSize(0); // resets cursorPlane size
 }
 
+function componentToHex(c) {
+    var hex = c.toString(16);
+    return hex.length == 1 ? "0" + hex : hex;
+}
+
 function rgbToHex(r, g, b) {
-    if (r > 255 || g > 255 || b > 255)
-        throw "Invalid color component";
-		if(r<10) r = "0"+r;
-		if(g<10) g = "0"+g;
-		if(b<10) b = "0"+b;
-    return ((r << 16) | (g << 8) | b).toString(16);
+    return "" + componentToHex(r) + componentToHex(g) + componentToHex(b);
 }
 
 
