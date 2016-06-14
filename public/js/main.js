@@ -232,6 +232,8 @@ controls.getObject().position.set(0,-roomHeight/2 +1,0);
 changeBrushSize(0);
 changeColor("000000");
 
+console.log("hash = " + window.location.hash);
+
 // var map = new THREE.TextureLoader().load( "cursor.png" );
 // var material = new THREE.SpriteMaterial( { map: map, color: 0xffffff, fog: false } );
 // cursor = new THREE.Sprite( material );

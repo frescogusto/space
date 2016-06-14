@@ -62,9 +62,9 @@ Wall.prototype.readImage = function(ctx){
 	});
 }
 
-Wall.prototype.saveImage = function(){
+Wall.prototype.saveImage = function(time){
 	console.log("SAVE IMAGE "+this.ctx);
-	var out = fs.createWriteStream(__dirname + '/textures/wall_' + this.number + '.png');
+	var out = fs.createWriteStream(__dirname + '/textures' + time + '/wall_' + this.number + '.png');
 	var stream = this.canvas.pngStream();
 
 	stream.on('data', function(chunk){
@@ -125,11 +125,23 @@ createWalls();
 
 setInterval(function(){
 
-for(var i=0; i<walls.length; i++){
-	walls[i].saveImage();
-}
+	for(var i=0; i<walls.length; i++){
+		walls[i].saveImage("");
+	}
 
  }, 60000);
+
+
+//  setInterval(function(){
+//
+// 	 var d = new Date();
+// 	 var time = d.getFullYear() + "_" + d.getMonth() + "_" + d.getDay() + "_" + d.getHours();
+//
+//  	for(var i=0; i<walls.length; i++){
+//  		walls[i].saveImage(time);
+//  	}
+//
+// }, 10000);
 
 io.on("connection", function(socket){
 
