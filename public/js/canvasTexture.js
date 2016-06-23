@@ -33,19 +33,19 @@ CanvasTexture = function ( parentTexture, w, h) {
 				this._context2D.fillStyle = "#ffffff";
 				this._context2D.fillRect(0,0,this._canvas.width,this._canvas.height);
 
-				for(var i=0; i<this._canvas.width; i++){
-					for(var j=0; j<this._canvas.height; j++){
-						ran = Math.round(Math.random()*200)+55 + j;
-						// ran = Math.round(Math.random()*150)+105 ;
-						// ran = j*Math.sin(i);
-						// ran = (i % 2 ? 0 : 1) + (j % 2 ? 0 : 1);
-						// ran = i % 2 * j % 2;
-						// ran = ran * 100 + 200;
-
-						this._context2D.fillStyle = "rgba("+ran+","+ran+","+ran+",255)";
-						this._context2D.fillRect( i, j, 1, 1 );
-					}
-				}
+				// for(var i=0; i<this._canvas.width; i++){
+				// 	for(var j=0; j<this._canvas.height; j++){
+				// 		ran = Math.round(Math.random()*200)+55 + j;
+				// 		// ran = Math.round(Math.random()*150)+105 ;
+				// 		// ran = j*Math.sin(i);
+				// 		// ran = (i % 2 ? 0 : 1) + (j % 2 ? 0 : 1);
+				// 		// ran = i % 2 * j % 2;
+				// 		// ran = ran * 100 + 200;
+				//
+				// 		this._context2D.fillStyle = "rgba("+ran+","+ran+","+ran+",255)";
+				// 		this._context2D.fillRect( i, j, 1, 1 );
+				// 	}
+				// }
 
 				// this._background.src = "textures/UV_Grid_Sm.jpg";
 
@@ -126,15 +126,15 @@ CanvasTexture.prototype = {
 		this._context2D.fillStyle = "#000000";
 		this._context2D.fillStyle = color;
 		size = brushSize;
-		halfsize = Math.round(size/2)
+		halfsize = Math.round(size/2);
 
-		// for(var i=0; i< brushSize; i++){
+		// for(var i=0; i< brushSize; i++){ // SPRAY BRUSH
 		// 	for(var j=0; j< brushSize; j++){
 		// 		if(Math.random() < 0.2)
 		// 		this._context2D.fillRect(x-halfsize+i,y-halfsize+j,1,1);
 		// 	}
 		// }
-		this._context2D.fillRect(x-halfsize,y-halfsize,size,size);
+		this._context2D.fillRect(x-halfsize,y-halfsize,size,size); // SQUARE BRUSH
 
 		this.updateTexture();
 

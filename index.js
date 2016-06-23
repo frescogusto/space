@@ -55,20 +55,29 @@ Wall.prototype.readImage = function(ctx){
 			return;
 		}
 	  img = new Image;
-	  img.src = loadedImg;
 		console.log("READ IMAGE " +ctx);
-	  ctx.drawImage(img, 0, 0, img.width, img.height);
+
+		img.onload = function(){
+				ctx.drawImage(img, 0, 0, img.width, img.height);
+				console.log("image loaded");
+		};
+		img.src = loadedImg;
+
 
 	});
 }
 
 Wall.prototype.saveImage = function(time){
 	console.log("SAVE IMAGE "+this.ctx);
-	var out = fs.createWriteStream(__dirname + '/textures' + time + '/wall_' + this.number + '.png');
+	var out = fs.createWriteStream(__dirname + '/textures' + '/wall_' + this.number + '.png');
 	var stream = this.canvas.pngStream();
 
 	stream.on('data', function(chunk){
 	  out.write(chunk);
+	});
+
+	stream.on('err',function(err){
+			console.log(err);
 	});
 
 	stream.on('end', function(){
@@ -129,7 +138,7 @@ setInterval(function(){
 		walls[i].saveImage("");
 	}
 
- }, 60000);
+}, 60000);
 
 
 //  setInterval(function(){
