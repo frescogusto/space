@@ -5,6 +5,7 @@ var http = require('http').Server(app);
 var io = require("socket.io")(http);
 var path = require("path");
 var fs = require("fs");
+var mkdirp = require('mkdirp');
 
 var Canvas = require("canvas");
 var Image = Canvas.Image;
@@ -67,9 +68,9 @@ Wall.prototype.readImage = function(ctx){
 	});
 }
 
-Wall.prototype.saveImage = function(time){
-	console.log("SAVE IMAGE "+this.ctx);
-	var out = fs.createWriteStream(__dirname + '/textures' + '/wall_' + this.number + '.png');
+Wall.prototype.saveImage = function(dir){
+	// console.log("SAVE IMAGE "+this.ctx);
+	var out = fs.createWriteStream( dir + '/wall_' + this.number + '.png');
 	var stream = this.canvas.pngStream();
 
 	stream.on('data', function(chunk){
@@ -82,6 +83,7 @@ Wall.prototype.saveImage = function(time){
 
 	stream.on('end', function(){
 	  console.log('saved png');
+		out.end();
 		// this.readImage(i);
 		// this.readImage(this.ctx,this.number);
 	});
@@ -135,22 +137,41 @@ createWalls();
 setInterval(function(){
 
 	for(var i=0; i<walls.length; i++){
-		walls[i].saveImage("");
+		walls[i].saveImage(__dirname + "/textures");
 	}
 
-}, 60000);
+},  60000);
 
 
-//  setInterval(function(){
-//
-// 	 var d = new Date();
-// 	 var time = d.getFullYear() + "_" + d.getMonth() + "_" + d.getDay() + "_" + d.getHours();
-//
-//  	for(var i=0; i<walls.length; i++){
-//  		walls[i].saveImage(time);
-//  	}
-//
-// }, 10000);
+setInterval(function(){
+
+	 var d = new Date();
+	 var time = d.getFullYear() + "_" + d.getMonth() + "_" + d.getDate() + "_@_" + n(d.getHours()) + "_" + n(d.getMinutes());
+
+	 var newDir =  __dirname + '/backup/textures_' + time;
+
+	 mkdirp(newDir, function (err) {
+	    if (err) console.error(err)
+	    else{
+				console.log("dir " + newDir + " created");
+				for(var i=0; i<walls.length; i++){
+					walls[i].saveImage(newDir);
+				}
+			}
+		});
+
+
+
+}, 60000 * 60 * 12);
+
+function n(n){
+    return n > 9 ? "" + n: "0" + n;
+}
+
+
+
+
+
 
 io.on("connection", function(socket){
 
