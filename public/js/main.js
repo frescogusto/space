@@ -1,10 +1,21 @@
 
+// var CubemapToEquirectangular = require('three.cubemap-to-equirectangular');
+
+
+var guiOn=false;
+//////
+
 var scene = new THREE.Scene();
 var camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.01, 1000 );
 
 var renderer = new THREE.WebGLRenderer();
 renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
+
+var cubeCamera = new THREE.CubeCamera( 0.1, 1000, 4096 );
+var equiUnmanaged = new CubemapToEquirectangular( renderer, true );
+// console.log(equiUnmanaged);
+
 
 var isDown = false;
 // var cursor;
@@ -128,7 +139,7 @@ var velocity = new THREE.Vector3();
 function init(){
 
 	var onKeyDown = function ( event ) {
-console.log(event.keyCode);
+// console.log(event.keyCode);
 						switch ( event.keyCode ) {
 
 							case 79:
@@ -152,20 +163,21 @@ console.log(event.keyCode);
 							case 53:
 								changeColor("0000ff");
 								break;
-							// case 54:
-							// 	changeColor("rgb(255,255,0)");
-							// 	break;
+							case 48:
+								saveCubemap();
+								break;
 							// case 55:
 							// 	changeColor("rgb(0,255,255)");
 							// 	break;
 
 							case 73:
 								cursorPlane.scale.set(1/64,1/64,1/64);
-								tool = 1;
+								setTool(1)
 								break;
 
 							case 67:
-								lockPointer();
+								// lockPointer();
+								toggleGui();
 								break;
 
 							case 38: // up
@@ -188,8 +200,10 @@ console.log(event.keyCode);
 								break;
 
 							case 32: // space
-								if ( canJump === true ) velocity.y += 350;
-								canJump = false;
+								// if ( canJump === true ) velocity.y += 350;
+								// canJump = false;
+								// this is where the developer updates the scene and creates a cubemap of the scene
+								toggleGui();
 								break;
 
 						}
@@ -228,11 +242,13 @@ console.log(event.keyCode);
 					document.addEventListener( 'keyup', onKeyUp, false );
 					window.addEventListener( 'resize', onWindowResize, false );
 
+
+
 controls.getObject().position.set(0,-roomHeight/2 +1,0);
 changeBrushSize(0);
 changeColor("000000");
 
-console.log("hash = " + window.location.hash);
+// console.log("hash = " + window.location.hash);
 
 // var map = new THREE.TextureLoader().load( "cursor.png" );
 // var material = new THREE.SpriteMaterial( { map: map, color: 0xffffff, fog: false } );
@@ -351,7 +367,7 @@ function getPixel(i, x, y){
 	col = rgbToHex(pix[0],pix[1],pix[2])
 	console.log(col);
 	changeColor(col);
-	tool = 0;
+	setTool(0);
 	changeBrushSize(0); // resets cursorPlane size
 }
 
@@ -555,60 +571,131 @@ function onWindowResize() {
 	// 	// instructions.innerHTML = 'Your browser doesn\'t seem to support Pointer Lock API';
 	//
 	// }
-document.addEventListener( 'click', function ( event ) {
 
-	element = document.body;
-	element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
-	element.requestPointerLock();
-	controls.enabled = true;
-	gui.style.display = "none";
-	document.getElementById('colorpicker').jscolor.hide();
-	cursorLocked = true;
+renderer.domElement.addEventListener( 'click', function ( event ) {
+
+	// element = document.body;
+	// element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
+	// element.requestPointerLock();
+	// controls.enabled = true;
+	// gui.style.display = "none";
+	// document.getElementById('colorpicker').jscolor.hide();
+	// cursorLocked = true;
+	hideGui();
+
 
 	// lockPointer();
 
 });
 
+if ("onpointerlockchange" in document) {
+	document.addEventListener('pointerlockchange', lockChangeAlert, false);
+} else if ("onmozpointerlockchange" in document) {
+	document.addEventListener('mozpointerlockchange', lockChangeAlert, false);
+}
+
+function lockChangeAlert() {
+	element = document.body;
+	if(document.pointerLockElement === element ||
+	document.mozPointerLockElement === element) {
+		console.log('The pointer lock status is now locked');
+		// Do something useful in response
+		lockPointer();
+	} else {
+		console.log('The pointer lock status is now unlocked');
+		// Do something useful in response
+		unlockPointer();
+	}
+}
+
+function unlockPointer(){
+
+	if(!cursorLocked) return;
+	// console.log('The pointer lock status is now locked. UNLOCKING');
+	document.exitPointerLock = document.exitPointerLock || document.mozExitPointerLock;
+	document.exitPointerLock();
+	controls.enabled = false;
+	// gui.style.display = "flex";
+
+	console.log("unlocked");
+	cursorLocked = false;
+
+
+}
+
 function lockPointer(){
 
-	var havePointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;
-	if ( havePointerLock ) {
+	if(cursorLocked) return;
 
 			console.log("pointer lock");
 			element = document.body;
 			gui = document.getElementById("gui");
-			if(document.pointerLockElement === element ||
-				document.mozPointerLockElement === element ||
-				document.webkitPointerLockElement === element) {
-					// console.log('The pointer lock status is now locked. UNLOCKING');
-					document.exitPointerLock = document.exitPointerLock || document.mozExitPointerLock;
-					document.exitPointerLock();
-					controls.enabled = false;
-					gui.style.display = "block";
-					document.getElementById('colorpicker').jscolor.show();
 
-					console.log("unlocked");
-					cursorLocked = false;
+			// if(document.pointerLockElement === element ||
+			// 	document.mozPointerLockElement === element ||
+			// 	document.webkitPointerLockElement === element) {
+			// 		// console.log('The pointer lock status is now locked. UNLOCKING');
+			// 		document.exitPointerLock = document.exitPointerLock || document.mozExitPointerLock;
+			// 		document.exitPointerLock();
+			// 		controls.enabled = false;
+			// 		gui.style.display = "flex";
+      //
+			// 		console.log("unlocked");
+			// 		cursorLocked = false;
+      //
+			// } else {
 
-			} else {
 					// console.log('The pointer lock status is now unlocked. LOCKING');
 					element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
 					element.requestPointerLock();
 					controls.enabled = true;
-					gui.style.display = "none";
-					document.getElementById('colorpicker').jscolor.hide();
+					// gui.style.display = "none";
 
 					console.log("LOCKED");
 					cursorLocked = true;
 
-			}
-
-	}
-	else {
-		console.log("POINTER LOCK NOT AVAILABLE");
-		// controls.enabled = true;
-	}
 
 }
 
 // lockPointer();
+function saveCubemap () {
+	cubeCamera.position.copy( camera.position );
+	cubeCamera.update( renderer, scene );
+	// call this to convert the cubemap rendertarget to a panorama
+	equiUnmanaged.convert( cubeCamera );
+
+	// equiUnmanaged.update( camera, scene );
+
+}
+
+function toggleGui(){
+	guiOn = !guiOn;
+	if(guiOn) showGui();
+	else hideGui();
+}
+
+function showGui() {
+	guiOn = true;
+	gui = document.getElementById("gui");
+	gui.style.display = "flex";
+	document.getElementById('colorpicker').jscolor.show();
+	unlockPointer();
+}
+function hideGui() {
+	guiOn = false;
+	gui = document.getElementById("gui");
+	gui.style.display = "none";
+	document.getElementById('colorpicker').jscolor.hide();
+	lockPointer();
+}
+
+function setTool(_tool) {
+	var cursor = document.querySelector("#cursor");
+	tool = _tool;
+	if(tool==0) {
+		cursor.style.backgroundImage = "none";
+	}
+	else if(tool==1) {
+		cursor.style.backgroundImage = "url('img/eyedrop.png')";
+	}
+}

@@ -855,7 +855,7 @@ var jsc = {
 					break;
 				}
 			};
-			
+
 			paletteObj.elm = vmlContainer;
 			paletteObj.draw = drawFunc;
 		}
@@ -926,7 +926,7 @@ var jsc = {
 				grad.color = color1;
 				grad.color2 = color2;
 			};
-			
+
 			sliderObj.elm = vmlContainer;
 			sliderObj.draw = drawFunc;
 		}
@@ -1013,18 +1013,18 @@ var jsc = {
 		this.buttonHeight = 18; // px
 		this.padding = 12; // px
 		this.backgroundColor = '#FFFFFF'; // CSS color
-		this.borderWidth = 1; // px
+		this.borderWidth = 0; // px
 		this.borderColor = '#BBBBBB'; // CSS color
-		this.borderRadius = 8; // px
-		this.insetWidth = 1; // px
+		this.borderRadius = 0; // px
+		this.insetWidth = 5; // px
 		this.insetColor = '#BBBBBB'; // CSS color
 		this.shadow = true; // whether to display shadow
 		this.shadowBlur = 15; // px
 		this.shadowColor = 'rgba(0,0,0,0.2)'; // CSS color
-		this.pointerColor = '#4C4C4C'; // px
+		this.pointerColor = '#000'; // px
 		this.pointerBorderColor = '#FFFFFF'; // px
-        this.pointerBorderWidth = 1; // px
-        this.pointerThickness = 2; // px
+        this.pointerBorderWidth = 0; // px
+        this.pointerThickness = 3; // px
 		this.zIndex = 1000;
 		this.container = null; // where to append the color picker (BODY element by default)
 

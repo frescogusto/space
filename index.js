@@ -10,6 +10,13 @@ var mkdirp = require('mkdirp');
 var Canvas = require("canvas");
 var Image = Canvas.Image;
 
+var util = require('util')
+var stream = require('stream')
+var es = require('event-stream');
+
+var lineNr = 0;
+var history;
+
 
 
 // app.use(express.static(path.join(__dirname, 'public')));
@@ -56,7 +63,7 @@ Wall.prototype.readImage = function(ctx){
 			return;
 		}
 	  img = new Image;
-		console.log("READ IMAGE " +ctx);
+		console.log("READ IMAGE " + ctx);
 
 		img.onload = function(){
 				ctx.drawImage(img, 0, 0, img.width, img.height);
@@ -97,9 +104,12 @@ Wall.prototype.draw = function(x,y,brushSize,color){
 	y = Math.round(y);
 
 	this.ctx.fillStyle = color;
-	size = brushSize;
-	halfsize = Math.round(size/2);
-	this.ctx.fillRect(x-halfsize,y-halfsize,size,size);
+	var halfsize = Math.round(brushSize/2);
+
+  this.ctx.fillRect(x-halfsize,y-halfsize,brushSize,brushSize);
+  // this.ctx.beginPath();
+  // this.ctx.arc(x,y,halfsize,0,2*Math.PI);
+  // this.ctx.fill();
 
 }
 
@@ -178,34 +188,28 @@ io.on("connection", function(socket){
 	console.log("USER CONNECTED");
 	socket.broadcast.emit("user connection", "user connected");
 
-
-for(var i=0; i<walls.length; i++){
-	socket.emit("updateWall", i,walls[i].canvas.toDataURL());
-	// console.log("CHISSA");
-}
-
-	// if(msgs.length>0){
-	// 	for(var i=0; i<msgs.length; i++){
-	// 		socket.emit("chat message", msgs[i].name, msgs[i].msg);
-	// 	}
-	// }
+  // CHANGE THIS TO A CLIENT REQUEST
+  for(var i=0; i<walls.length; i++){
+  	socket.emit("updateWall", i,walls[i].canvas.toDataURL());
+  	// console.log("CHISSA");
+  }
 
 	socket.on("disconnect", function(){
 		console.log("DISCONNECTOOTOTO");
 	});
 
-	// socket.on("chat message", function(name, msg){
-	// 	console.log(msg);
-	// 	io.emit("chat message", name, msg);
-	// 	addMsg(name,msg);
-	// 	// socket.broadcast.emit("chat message", msg);
-	// });
+	socket.on("drawHistory", function(frameTime,loops){
+		drawHistory(frameTime, loops);
+	})
 
 	socket.on("draw", function(wall,x,y,brushSize, color){
 		// (x,y,brushSize, color)
 		// console.log("someone is drawing at " + x + " " + y + " brush:" + brushSize + " color " + color);
 		walls[wall].draw(x,y,brushSize,color);
 		socket.broadcast.emit("draw",wall,x,y,brushSize,color);
+
+		writeLog(wall,x,y,brushSize,color);
+
 	});
 
 	// socket.on("typing", function(name){
@@ -213,3 +217,69 @@ for(var i=0; i<walls.length; i++){
 	// });
 
 });
+
+function writeLog(wall, x, y, brushSize, color) {
+	// var d;
+	// d.wall = wall;
+	// d.x = x;
+	// d.y = y;
+	// d.brushSize = brushSize;
+	// d.color = color;
+	t = new Date().getTime();
+	var data = t + " " + wall + " " + x + " " + y + " " + brushSize + " " + color + "\n";
+	fs.appendFile('drawLog.txt', data, function (err) {
+
+	});
+}
+
+// drawHistory(10);
+
+function drawHistory(frameTime, loops){
+
+	lineNr = 0;
+	clearTimeout(history);
+
+	var s = fs.createReadStream('drawLog.txt')
+    .pipe(es.split())
+    .pipe(es.mapSync(function(line){
+
+        // pause the readstream
+        s.pause();
+
+        lineNr += 1;
+
+        // process line here and call s.resume() when rdy
+        // function below was for logging memory usage
+        // logMemoryUsage(lineNr);
+
+				// console.log(line);
+
+				history = setTimeout(function(){
+					console.log(line);
+					var asd = line.split(" ");
+					// console.log(asd);
+
+					if(asd != ""){
+							draw(asd[1], asd[2], asd[3], parseInt(asd[4]), asd[5]);
+					}
+					// resume the readstream, possibly from a callback
+					s.resume();
+				},frameTime);
+
+
+    })
+    .on('error', function(){
+        console.log('Error while reading file.');
+    })
+    .on('end', function(){
+        console.log('Read entire file.');
+				if(loops) drawHistory(frameTime, loops);
+    })
+  );
+}
+
+
+function draw(wall,x,y,brushSize,color) {
+	walls[wall].draw(x,y,brushSize,color);
+	io.emit("draw",wall,x,y,brushSize,color);
+}

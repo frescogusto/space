@@ -152,7 +152,7 @@ CanvasTexture.prototype = {
 		var img = new Image;
 		var thisTex = this;
 		img.onload = function(){ // wait for img to load after setting src -> http://stackoverflow.com/questions/4776670/should-setting-an-image-src-to-data-url-be-available-immediately
-			console.log(thisTex);
+			// console.log(thisTex);
 			thisTex._context2D.drawImage( img, 0, 0 );
 			thisTex.updateTexture();
 		}
