@@ -60,6 +60,7 @@ Copyright (c) 2014 Rafał Lindemann. http://panrafal.github.com/depthy
        <rdf:Description rdf:about=''
         xmlns:GPano='http://ns.google.com/photos/1.0/panorama/'>
         <GPano:ProjectionType>equirectangular</GPano:ProjectionType>
+        <GPano:InitialHorizontalFOVDegrees>180</GPano:InitialHorizontalFOVDegrees>
        </rdf:Description>
       </rdf:RDF>
       </x:xmpmeta>`
@@ -76,7 +77,7 @@ Copyright (c) 2014 Rafał Lindemann. http://panrafal.github.com/depthy
       } : null;
     },
 
-    
+
 
     encodeXMP: function(buffer, standardXMP, extendedXMP) {
       var data = new DataView(buffer),
