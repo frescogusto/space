@@ -187,7 +187,8 @@ CubemapToEquirectangular.prototype.download = function( imageData ) {
     myReader.readAsArrayBuffer(blob);
     myReader.addEventListener("loadend", function(e)
     {
-        var buffer = e.srcElement.result;//arraybuffer object
+				// console.log(e);
+        var buffer = e.target.result;//arraybuffer object
 				var asd = GDepthEncoder.encodeXMP(buffer, standardXMP, extendedXMP);
 				console.log(asd);
 				makeBlob(asd);
