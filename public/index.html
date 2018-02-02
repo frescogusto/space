@@ -38,19 +38,74 @@
 			height: 20px;
 			font-size: 1rem;
 		}
+		textarea, input, button { outline: none; }
+
+		input[type=range]
+		{
+		    width: 100%;
+		    height: 15px;
+				-webkit-appearance: none;
+		    appearance: none;
+				/* border: 5px solid black; */
+				background: #ccc;
+				margin: 0;
+		    /* padding: 0 5px; */
+		}
+		input[type=range]::-webkit-slider-thumb {
+			-webkit-appearance: none;
+			background: black;
+			height: 15px;
+			width: 15px;
+		}
+		input[type=range]::-moz-range-thumb {
+			-webkit-appearance: none;
+			background: black;
+			height: 15px;
+			width: 15px;
+		}
 		.gui {
 			background: white;
 			border: 5px solid black;
 			margin: 5px 0 0 5px;
 			padding: 5px;
-			max-width: 50px;
+			/* max-width: 50px; */
 			max-height: 50px;
 			min-height: 50px;
 			min-width: 50px;
+
+		}
+		.colors {
+			max-width: 121px;
+			text-align: center;
+			font-size: 1rem;
 		}
 		</style>
 	</head>
 	<body>
+
+		<div id="cursor"></div>
+
+		<div id="gui">
+
+			<input class="colors gui jscolor {width:100, padding:0, shadow:false, borderWidth:0, backgroundColor:'transparent', insetColor:'#000', pointerBorderWidth:'0'}"
+			id="colorpicker" onchange="changeColor(this.jscolor)">
+
+			<div class="gui brushSize">
+				<div class="brushSizeVal">asd
+				</div>
+				<input id="brushSize" type="range" step="1" value="5" min="1" max="100">
+			</div>
+
+			<div class="gui share">
+				<a onclick="saveCubemap();">save 360 room</a>
+			</div>
+			<!-- <div class="gui info">
+				Il mormonismo è una religione fondata da Joseph Smith, che disse di aver ricevuto per rivelazione il Libro di Mormon e fu considerato profeta dalla comunità di praticanti della poligamia[1][2] da lui fondata, i quali vennero comunemente identificati come mormoni.
+			</div> -->
+		</div>
+
+
+
 		<script src="js/three.min.js"></script>
     <script src="js/canvasTexture.js"></script>
 		<script src="js/PointerLockControls.js"></script>
@@ -88,21 +143,8 @@
 		</script>
 
 
-		<div id="cursor"></div>
-		<div class="info">
 
-		</div>
-		<div id="gui">
 
-			<input class="gui jscolor {width:100, padding:0, shadow:false, borderWidth:0, backgroundColor:'transparent', insetColor:'#000', pointerBorderWidth:'0'}" id="colorpicker" onchange="changeColor(this.jscolor)" value="ab2567">
-
-			<div class="gui brushSize">
-				brush shize
-			</div>
-			<div class="gui share">
-				<a onclick="saveCubemap();">save 360 room</a>
-			</div>
-		</div>
 
 	</body>
 </html>

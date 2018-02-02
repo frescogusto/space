@@ -105,7 +105,8 @@ var geometry = new THREE.PlaneGeometry( 1,1);
 var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
 material.polygonOffset = true;
 material.depthTest = true;
-material.polygonOffsetFactor = -1; // fix z-fighting
+// material.depthWrite = false;
+material.polygonOffsetFactor = -100; // fix z-fighting
 material.polygonOffsetUnits = 0.1;
 var cursorPlane = new THREE.Mesh( geometry, material );
 scene.add( cursorPlane );
@@ -242,6 +243,12 @@ function init(){
 					document.addEventListener( 'keyup', onKeyUp, false );
 					window.addEventListener( 'resize', onWindowResize, false );
 
+					document.getElementById("brushSize").addEventListener("input", function() {
+					    // this.textContent = rangeInput.value;
+							setBrushSize(this.value);
+
+							// console.log(this);
+					}, false);
 
 
 controls.getObject().position.set(0,-roomHeight/2 +1,0);
@@ -337,11 +344,18 @@ function updateCursorPlane(point, rot){
 }
 
 function changeBrushSize(offset){
-	brushSize += offset;
-	if(brushSize<1)
-	brushSize = 1;
+	var size = brushSize + offset;
+	if(size<1)
+		size = 1;
+	setBrushSize(size);
+}
 
+function setBrushSize(size) {
+
+	brushSize = parseInt(size);
 	cursorPlane.scale.set(brushSize/64,brushSize/64,brushSize/64);
+	document.querySelector(".brushSizeVal").innerHTML = "brush size: " + size;
+	// console.log(brushSize);
 }
 
 
@@ -349,7 +363,7 @@ function changeColor(col){
 	console.log(col.toString());
 	drawColor = "#"+col;
 	cursorPlane.material.color = new THREE.Color(parseInt("0x"+col));
-	if(document.getElementById("colorpicker") ){
+	if(document.getElementById("colorpicker").jscolor ){
 		document.getElementById('colorpicker').jscolor.fromString(col.toString());
 		// console.log(document.getElementById('colorpicker').jscolor);
 	}

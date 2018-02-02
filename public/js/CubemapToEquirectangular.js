@@ -208,11 +208,33 @@ CubemapToEquirectangular.prototype.download = function( imageData ) {
 
 };
 
+function addZero(i) {
+    if (i < 10) {
+        i = "0" + i;
+    }
+    return i;
+}
+
+function getDate() {
+	var d = new Date();
+	var y = addZero(d.getFullYear());
+	var mo = addZero(d.getMonth()+1);
+	var day = addZero(d.getDate());
+	var h = addZero(d.getHours());
+	var m = addZero(d.getMinutes());
+	var s = addZero(d.getSeconds());
+
+	var date = y+ '-'+mo+ '-'+day+ '-'+h+ '-'+m+ '-'+s;
+	return date;
+}
+
 function makeBlob(blob) {
 	var url = URL.createObjectURL(blob);
 
+
+
 	// var fileName = '' + document.title + '-' + Date.now() + '.jpg';
-	var fileName = '' + document.title + '.jpg';
+	var fileName = '' + document.title + "-" + getDate() + '.jpg';
 	var anchor = document.createElement( 'a' );
 	anchor.href = url;
 	anchor.setAttribute("download", fileName);
