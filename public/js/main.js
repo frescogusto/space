@@ -18,6 +18,7 @@ var equiUnmanaged = new CubemapToEquirectangular( renderer, true );
 
 
 var isDown = false;
+var firstClick = true;
 // var cursor;
 var cursorLocked = false;
 
@@ -255,6 +256,9 @@ controls.getObject().position.set(0,-roomHeight/2 +1,0);
 changeBrushSize(0);
 changeColor("000000");
 
+jscolor.installByClassName("jscolor");
+showGui();
+
 // console.log("hash = " + window.location.hash);
 
 // var map = new THREE.TextureLoader().load( "cursor.png" );
@@ -266,41 +270,6 @@ changeColor("000000");
 init();
 
 
-
-// function drawAtPoint(event){
-// 	// calculate mouse position in normalized device coordinates
-// 	// (-1 to +1) for both components
-// 	// mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-// 	// mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-// 	mouse.x = ( window.innerWidth*0.5 / window.innerWidth ) * 2 - 1;
-// 	mouse.y = - ( window.innerHeight*0.5 / window.innerHeight ) * 2 + 1;
-//
-// 	// update the picking ray with the camera and mouse position
-// 	raycaster.setFromCamera( mouse, camera );
-// 	// calculate objects intersecting the picking ray
-// 	var intersects = raycaster.intersectObjects( walls );
-//
-// 	for ( var i = 0; i < intersects.length; i++ ) {
-// 		var uv = intersects[ i ].uv;
-// 		// console.log(intersects[ i ].object);
-// 		intersects[i].object.material.map.transformUv( uv );
-// 		// intersects[ i ].object.obj.canvas.setCrossPosition( uv.x, uv.y, brushSize);
-// 		// intersects[ i ].object.obj.canvas._draw( uv.x, uv.y, brushSize, drawColor);
-// 		num = intersects[i].object.number; // intersected wall number
-//
-// 		console.log(intersects[i]);
-// 		// face.normal
-// 		updateCursorPlane(intersects[i].point, intersects[i].object.rotation);
-//
-// 		if(cursorLocked){
-// 			drawOnWall(num,uv.x,uv.y,brushSize,drawColor);
-// 			socket.emit("draw",num,uv.x,uv.y,brushSize,drawColor);
-// 		}
-//
-// 		// sphere.position.set(intersects[ i ].point.x,intersects[ i ].point.y,intersects[ i ].point.z);
-//
-// 	}
-// }
 
 
 function updateRaycast(){
@@ -318,16 +287,16 @@ function updateRaycast(){
 			var uv = intersects[ i ].uv;
 			intersects[i].object.material.map.transformUv( uv );
 
-			if(tool == 0){
+			if(tool == 0 && !firstClick){
 				drawOnWall(num,uv.x,uv.y,brushSize,drawColor);
 				socket.emit("draw",num,uv.x,uv.y,brushSize,drawColor);
 			}
 			else if(tool == 1){
 					getPixel(num,uv.x,uv.y);
+					firstClick = true;
 			}
-
-
 		}
+
 	}
 
 }
@@ -383,6 +352,7 @@ function getPixel(i, x, y){
 	changeColor(col);
 	setTool(0);
 	changeBrushSize(0); // resets cursorPlane size
+
 }
 
 function componentToHex(c) {
@@ -398,9 +368,13 @@ function rgbToHex(r, g, b) {
 
 function onDocumentMouseDown(event){
 	isDown = true;
+	// firstClick = true;
+	// console.log(isDown);
 }
 function onDocumentMouseUp(event){
 	isDown = false;
+	firstClick = false;
+	// console.log(isDown);
 }
 
 // document.addEventListener( 'mousemove', onMouseMove, false );
@@ -633,7 +607,7 @@ function unlockPointer(){
 
 	console.log("unlocked");
 	cursorLocked = false;
-
+	showGui();
 
 }
 
@@ -641,33 +615,17 @@ function lockPointer(){
 
 	if(cursorLocked) return;
 
-			console.log("pointer lock");
-			element = document.body;
-			gui = document.getElementById("gui");
+	element = document.body;
+	gui = document.getElementById("gui");
 
-			// if(document.pointerLockElement === element ||
-			// 	document.mozPointerLockElement === element ||
-			// 	document.webkitPointerLockElement === element) {
-			// 		// console.log('The pointer lock status is now locked. UNLOCKING');
-			// 		document.exitPointerLock = document.exitPointerLock || document.mozExitPointerLock;
-			// 		document.exitPointerLock();
-			// 		controls.enabled = false;
-			// 		gui.style.display = "flex";
-      //
-			// 		console.log("unlocked");
-			// 		cursorLocked = false;
-      //
-			// } else {
+			// console.log('The pointer lock status is now unlocked. LOCKING');
+	element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
+	element.requestPointerLock();
+	controls.enabled = true;
+	// gui.style.display = "none";
 
-					// console.log('The pointer lock status is now unlocked. LOCKING');
-					element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
-					element.requestPointerLock();
-					controls.enabled = true;
-					// gui.style.display = "none";
-
-					console.log("LOCKED");
-					cursorLocked = true;
-
+	console.log("LOCKED");
+	cursorLocked = true;
 
 }
 
@@ -693,6 +651,7 @@ function showGui() {
 	gui = document.getElementById("gui");
 	gui.style.display = "flex";
 	document.getElementById('colorpicker').jscolor.show();
+
 	unlockPointer();
 }
 function hideGui() {

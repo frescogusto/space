@@ -89,7 +89,7 @@ Wall.prototype.saveImage = function(dir){
 	});
 
 	stream.on('end', function(){
-	  console.log('saved png');
+	  // console.log('saved png');
 		out.end();
 		// this.readImage(i);
 		// this.readImage(this.ctx,this.number);

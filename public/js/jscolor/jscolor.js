@@ -537,9 +537,9 @@ var jsc = {
 			jsc.onControlPointerStart(e, target, target._jscControlName, 'mouse');
 		} else {
 			// Mouse is outside the picker controls -> hide the color picker!
-			if (jsc.picker && jsc.picker.owner) {
-				jsc.picker.owner.hide();
-			}
+			// if (jsc.picker && jsc.picker.owner) {
+			// 	jsc.picker.owner.hide();
+			// }
 		}
 	},
 
@@ -1025,6 +1025,8 @@ var jsc = {
 		this.pointerBorderColor = '#FFFFFF'; // px
         this.pointerBorderWidth = 0; // px
         this.pointerThickness = 3; // px
+				this.sliderPointerBorderColor = '#000000';
+				this.sliderPointerBorderWidth = 0;
 		this.zIndex = 1000;
 		this.container = null; // where to append the color picker (BODY element by default)
 
@@ -1570,13 +1572,15 @@ var jsc = {
 
 			// slider pointer inner and outer border
 			p.sldPtrIB.style.border =
-			p.sldPtrOB.style.border =
-				THIS.pointerBorderWidth + 'px solid ' + THIS.pointerBorderColor;
+			// p.sldPtrOB.style.border =
+				THIS.sliderPointerBorderWidth + 'px solid ' + THIS.sliderPointerBorderColor;
 
 			// slider pointer outer border
 			p.sldPtrOB.style.position = 'absolute';
 			p.sldPtrOB.style.left = -(2 * THIS.pointerBorderWidth + THIS.pointerThickness) + 'px';
 			p.sldPtrOB.style.top = '0';
+			p.sldPtrOB.style.maxHeight = '5px';
+			p.sldPtrOB.style.border = '0px';
 
 			// slider pointer middle border
 			p.sldPtrMB.style.border = THIS.pointerThickness + 'px solid ' + THIS.pointerColor;
@@ -1739,7 +1743,7 @@ var jsc = {
 			this.container ?
 			jsc.fetchElement(this.container) :
 			document.getElementsByTagName('body')[0];
-		var sliderPtrSpace = 3; // px
+		var sliderPtrSpace = 0; // px
 
 		// For BUTTON elements it's important to stop them from sending the form when clicked
 		// (e.g. in Safari)
