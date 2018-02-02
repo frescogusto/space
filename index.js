@@ -58,7 +58,7 @@ Wall.prototype.readImage = function(ctx){
 	var t = this;
 	fs.readFile(__dirname + '/textures/wall_' + this.number + '.png', function(err, loadedImg){
 	  if (err) {
-			t.saveImage();
+			t.saveImage(__dirname + '/textures');
 			// throw err;
 			return;
 		}
@@ -155,8 +155,7 @@ setInterval(function(){
 
 setInterval(function(){
 
-	 var d = new Date();
-	 var time = d.getFullYear() + "_" + d.getMonth() + "_" + d.getDate() + "_@_" + n(d.getHours()) + "_" + n(d.getMinutes());
+	 var time = getDate();
 
 	 var newDir =  __dirname + '/backup/textures_' + time;
 
@@ -282,4 +281,25 @@ function drawHistory(frameTime, loops){
 function draw(wall,x,y,brushSize,color) {
 	walls[wall].draw(x,y,brushSize,color);
 	io.emit("draw",wall,x,y,brushSize,color);
+}
+
+
+function addZero(i) {
+    if (i < 10) {
+        i = "0" + i;
+    }
+    return i;
+}
+
+function getDate() {
+	var d = new Date();
+	var y = addZero(d.getFullYear());
+	var mo = addZero(d.getMonth()+1);
+	var day = addZero(d.getDate());
+	var h = addZero(d.getHours());
+	var m = addZero(d.getMinutes());
+	var s = addZero(d.getSeconds());
+
+	var date = y+ '-'+mo+ '-'+day+ '-'+h+ '-'+m+ '-'+s;
+	return date;
 }
