@@ -19,7 +19,7 @@ var equiUnmanaged = new CubemapToEquirectangular( renderer, true );
 
 var isDown = false;
 var firstClick = true;
-// var cursor;
+var cursor = document.querySelector("#cursor");
 var cursorLocked = false;
 
 var roomWidth = 8;
@@ -30,6 +30,7 @@ var brushSize = 10;
 var drawColor = "black";
 var colors = [10];
 var currentColorItem = 0;
+var inventoryItems = document.querySelectorAll(".inventory .item");
 
 var tool = 0;
 
@@ -311,12 +312,46 @@ function updateRaycast(){
 
 function updateCursorPlane(point, rot){
 	// cursorPlane.position.set(point.x,point.y,point.z);
+
+	var x = Math.round(point.x*64)/64;
+	var y = Math.round(point.y*64)/64;
+	var z = Math.round(point.z*64)/64;
+
 	if(brushSize%2 != 0){ // align to pixel when width is odd
 			// console.log(rot);
+			// console.log(point);
+			if(rot._x == 0) {
+				if(rot._y == 0) { // parete che vedi all inizio
+					y += 1/128;
+					x -= 1/128;
+				}
+				else if(rot._y == Math.PI/2) { // left wall
+					y += 1/128;
+					z += 1/128;
+				}
+				else if(rot._y == Math.PI) { // back wall
+					y += 1/128;
+					x += 1/128;
+				}
+				else if(rot._y == -Math.PI/2) { // right wall
+					y += 1/128;
+					z -= 1/128;
+				}
+			}
+			else {
+				if(rot._x < 0) { // pavement
+					x -= 1/128;
+					z -= 1/128;
+				}
+				else if(rot._x > 0) { // ceiling
+					x -= 1/128;
+					z += 1/128;
+				}
+			}
+
 	}
 
-	cursorPlane.position.set(Math.round(point.x*64)/64,Math.round(point.y*64)/64,Math.round(point.z*64)/64);
-
+	cursorPlane.position.set(x,y,z);
 	cursorPlane.rotation.set(rot.x,rot.y,rot.z);
 }
 
@@ -338,7 +373,7 @@ function setBrushSize(size) {
 
 
 function changeColor(col){
-	console.log(col.toString());
+	// console.log(col.toString());
 	drawColor = "#"+col;
 	cursorPlane.material.color = new THREE.Color(parseInt("0x"+col));
 	if(document.getElementById("colorpicker").jscolor ){
@@ -672,7 +707,6 @@ function hideGui() {
 }
 
 function setTool(_tool) {
-	var cursor = document.querySelector("#cursor");
 	tool = _tool;
 	if(tool==0) {
 		cursor.style.backgroundImage = "none";
@@ -687,11 +721,11 @@ function setTool(_tool) {
 function switchColor(i) {
 	currentColorItem = i;
 	document.querySelectorAll(".inventory .selected")[0].classList.remove("selected");
-	document.querySelectorAll(".inventory .item")[i].classList.add("selected");
+	inventoryItems[i].classList.add("selected");
 	changeColor(colors[i]);
 }
 
 function setColor(i,col) {
 	colors[i] = col;
-	document.querySelectorAll(".inventory .item")[i].style.backgroundColor = "#"+col;
+	inventoryItems[i].style.backgroundColor = "#"+col;
 }
