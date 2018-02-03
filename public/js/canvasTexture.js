@@ -134,7 +134,12 @@ CanvasTexture.prototype = {
 		// 		this._context2D.fillRect(x-halfsize+i,y-halfsize+j,1,1);
 		// 	}
 		// }
+
 		this._context2D.fillRect(x-halfsize,y-halfsize,size,size); // SQUARE BRUSH
+
+		// drawCircle(this._context2D, x,y,size);
+
+
 
 		this.updateTexture();
 
@@ -190,5 +195,20 @@ CanvasPlane = function(_width, _height){
 
 	this.plane = new THREE.Mesh( this.geometry, this.material );
 	this.plane.obj = this; // make mesh reference its CanvasPlane object
+
+}
+
+function drawCircle(context,x,y,size){
+
+	halfsize = Math.floor(size/2);
+	// brushSize = Math.round(size);
+	for ( var i=0; i<size; i++){
+		for ( var j=0; j<size; j++){
+			var d = Math.round(Math.sqrt((halfsize-i)*(halfsize-i) + (halfsize-j)*(halfsize-j)));
+			if(d > halfsize){
+				context.fillRect(x+i-halfsize,y+j-halfsize,1,1);
+			}
+		}
+	}
 
 }

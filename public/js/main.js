@@ -28,6 +28,8 @@ var roomDepth = 8;
 
 var brushSize = 10;
 var drawColor = "black";
+var colors = [10];
+var currentColorItem = 0;
 
 var tool = 0;
 
@@ -142,6 +144,14 @@ function init(){
 
 	var onKeyDown = function ( event ) {
 // console.log(event.keyCode);
+
+if(event.keyCode >=49 && event.keyCode <= 57) {
+	switchColor(event.keyCode-49);
+}
+if(event.keyCode ==48) {
+	switchColor(9);
+}
+
 						switch ( event.keyCode ) {
 
 							case 79:
@@ -150,30 +160,13 @@ function init(){
 							case 80:
 								changeBrushSize(1);
 								break;
-							case 49:
-								changeColor("ffffff");
-								break;
-							case 50:
-								changeColor("000000");
-								break;
-							case 51:
-								changeColor("ff0000");
-								break;
-							case 52:
-								changeColor("00ff00");
-								break;
-							case 53:
-								changeColor("0000ff");
-								break;
-							case 48:
-								saveCubemap();
-								break;
-							// case 55:
-							// 	changeColor("rgb(0,255,255)");
+
+							// case 48:
+							// 	saveCubemap();
 							// 	break;
 
+
 							case 73:
-								cursorPlane.scale.set(1/64,1/64,1/64);
 								setTool(1)
 								break;
 
@@ -252,12 +245,27 @@ function init(){
 					}, false);
 
 
+setColor(0,"000000");
+setColor(1,"ffffff");
+setColor(2,"ff0000");
+setColor(3,"00ff00");
+setColor(4,"0000ff");
+setColor(5,"ffff00");
+setColor(6,"ff00ff");
+setColor(7,"00ffff");
+setColor(8,"ccc999");
+setColor(9,"333");
+
 controls.getObject().position.set(0,-roomHeight/2 +1,0);
 changeBrushSize(0);
 changeColor("000000");
 
 jscolor.installByClassName("jscolor");
 showGui();
+
+
+
+
 
 // console.log("hash = " + window.location.hash);
 
@@ -289,7 +297,7 @@ function updateRaycast(){
 
 			if(tool == 0 && !firstClick){
 				drawOnWall(num,uv.x,uv.y,brushSize,drawColor);
-				socket.emit("draw",num,uv.x,uv.y,brushSize,drawColor);
+				// socket.emit("draw",num,uv.x,uv.y,brushSize,drawColor);
 			}
 			else if(tool == 1){
 					getPixel(num,uv.x,uv.y);
@@ -324,6 +332,7 @@ function setBrushSize(size) {
 	brushSize = parseInt(size);
 	cursorPlane.scale.set(brushSize/64,brushSize/64,brushSize/64);
 	document.querySelector(".brushSizeVal").innerHTML = "brush size: " + size;
+	document.querySelector("#brushSize").value = size;
 	// console.log(brushSize);
 }
 
@@ -336,7 +345,7 @@ function changeColor(col){
 		document.getElementById('colorpicker').jscolor.fromString(col.toString());
 		// console.log(document.getElementById('colorpicker').jscolor);
 	}
-
+	setColor(currentColorItem, col.toString());
 	// document.getElementById("cursor").style.backgroundColor = col;
 }
 
@@ -669,6 +678,20 @@ function setTool(_tool) {
 		cursor.style.backgroundImage = "none";
 	}
 	else if(tool==1) {
+		cursorPlane.scale.set(1/64,1/64,1/64);
 		cursor.style.backgroundImage = "url('img/eyedrop.png')";
 	}
+}
+
+// INVENTORY COLORS
+function switchColor(i) {
+	currentColorItem = i;
+	document.querySelectorAll(".inventory .selected")[0].classList.remove("selected");
+	document.querySelectorAll(".inventory .item")[i].classList.add("selected");
+	changeColor(colors[i]);
+}
+
+function setColor(i,col) {
+	colors[i] = col;
+	document.querySelectorAll(".inventory .item")[i].style.backgroundColor = "#"+col;
 }

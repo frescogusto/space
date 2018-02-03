@@ -7,6 +7,8 @@
 		html{
 			font-size: 14px;
 			user-select: none;
+			-moz-user-select: none;
+			-webkit-user-select: none;
 		}
 			body {
 				margin: 0; overflow: hidden;
@@ -25,12 +27,10 @@
 		}
 		#gui{
 			display: none;
-			width: auto;
+			width: 100%;
 			height: 10vh;
 			position: absolute;
 			top: 0;
-			/* left: 50%; */
-			/*background: white;*/
 		}
 		input{
 			padding: 0;
@@ -69,6 +69,7 @@
 			margin: 5px 0 0 5px;
 			padding: 5px;
 			min-width: 50px;
+			/* max-width: 200px; */
 			max-height: 50px;
 			min-height: 50px;
 
@@ -81,6 +82,45 @@
 			max-width: 121px;
 			text-align: center;
 			font-size: 1rem;
+		}
+		.info {
+			position: absolute;
+			max-height: none;
+			display: block;
+			top: 0px;
+			right: 5px;
+			width: 25%;
+		}
+		.info ul {
+			margin: 0;
+			padding: 0;
+			list-style-type: none;
+			text-align: left;
+		}
+		ul li {
+			margin-bottom: 10px;
+
+		}
+		a {
+			color: red;
+		}
+		.inventory{
+			width: 100%;
+			position: absolute;
+			bottom: 0;
+			display: flex;
+		  justify-content: center;
+		  align-items: center;
+		}
+		.item {
+			width: 30px;
+			height: 30px;
+			border: 5px solid black;
+			background: white;
+			margin: 0 5px 5px 0;
+		}
+		.item.selected {
+			outline: 5px solid white;
 		}
 		</style>
 	</head>
@@ -101,12 +141,38 @@
 				</div>
 			</div>
 
-			<div class="gui share">
-				<a onclick="saveCubemap();">save 360 room</a>
+
+			<div class="gui picker" onclick="setTool(1);">
+				<img src="img/eyedrop.png" alt="">
 			</div>
-			<!-- <div class="gui info">
-				Il mormonismo è una religione fondata da Joseph Smith, che disse di aver ricevuto per rivelazione il Libro di Mormon e fu considerato profeta dalla comunità di praticanti della poligamia[1][2] da lui fondata, i quali vennero comunemente identificati come mormoni.
-			</div> -->
+			<div class="gui share" onclick="saveCubemap();">
+				save 360
+			</div>
+
+			<div class="gui info">
+				<!-- <h2>ciao</h2> -->
+				<ul>
+					<li>benvenuto a <a href="#">superinterent.space</a>, dove puoi giocare con i disegnio life</li>
+					<li>muoviti con "wasd" o "frecce"</li>
+					<li>premi "i" per color picker</li>
+					<li>premi "o" e "p" per pennel size, oppure usa il coso in alto a sinistra</li>
+					<li>premi "save 360" per salvare la merda e shararla su facebook di merda mark zuckerberg figlio di puttana</li>
+					<li>premi "barra spazio" per tornare a questo menu</li>
+				</ul>
+			</div>
+		</div>
+
+		<div class="inventory">
+			<div class="item selected">1</div>
+			<div class="item">2</div>
+			<div class="item">3</div>
+			<div class="item">4</div>
+			<div class="item">5</div>
+			<div class="item">6</div>
+			<div class="item">7</div>
+			<div class="item">8</div>
+			<div class="item">9</div>
+			<div class="item">0</div>
 		</div>
 
 
