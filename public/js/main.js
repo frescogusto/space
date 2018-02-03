@@ -679,12 +679,15 @@ function lockPointer(){
 
 // lockPointer();
 function saveCubemap () {
+
+	cursorPlane.visible = false; // hide cursor in 360 image
+
 	cubeCamera.position.copy( camera.position );
 	cubeCamera.update( renderer, scene );
 	// call this to convert the cubemap rendertarget to a panorama
 	equiUnmanaged.convert( cubeCamera );
 
-	// equiUnmanaged.update( camera, scene );
+	cursorPlane.visible = true; // make cursor visible again
 
 }
 
