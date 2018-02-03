@@ -297,7 +297,7 @@ function updateRaycast(){
 
 			if(tool == 0 && !firstClick){
 				drawOnWall(num,uv.x,uv.y,brushSize,drawColor);
-				// socket.emit("draw",num,uv.x,uv.y,brushSize,drawColor);
+				socket.emit("draw",num,uv.x,uv.y,brushSize,drawColor);
 			}
 			else if(tool == 1){
 					getPixel(num,uv.x,uv.y);
