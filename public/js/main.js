@@ -1,6 +1,10 @@
 
 // var CubemapToEquirectangular = require('three.cubemap-to-equirectangular');
 
+if ( ! Detector.webgl ) {
+	Detector.addGetWebGLMessage();
+	document.querySelector(".inventory").style.display = "none";
+}
 
 var guiOn=false;
 //////
@@ -255,7 +259,7 @@ setColor(5,"ffff00");
 setColor(6,"ff00ff");
 setColor(7,"00ffff");
 setColor(8,"ccc999");
-setColor(9,"333");
+setColor(9,"333333");
 
 controls.getObject().position.set(0,-roomHeight/2 +1,0);
 changeBrushSize(0);
