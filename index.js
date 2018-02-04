@@ -96,7 +96,7 @@ Wall.prototype.saveImage = function(dir){
 	});
 }
 
-Wall.prototype.draw = function(x,y,brushSize,color){
+Wall.prototype.draw = function(x,y,brushSize,color,brushType){
 
 	x *= this.canvas.width;
 	y *= this.canvas.height;
@@ -106,7 +106,13 @@ Wall.prototype.draw = function(x,y,brushSize,color){
 	this.ctx.fillStyle = color;
 	var halfsize = Math.round(brushSize/2);
 
-  this.ctx.fillRect(x-halfsize,y-halfsize,brushSize,brushSize);
+  // this.ctx.fillRect(x-halfsize,y-halfsize,brushSize,brushSize);
+	if(brushType == 0) {
+		this.ctx.fillRect(x-halfsize,y-halfsize,brushSize,brushSize); // SQUARE BRUSH
+	}
+	else if(brushType==1) {
+		drawCircle(this.ctx, x,y,brushSize);
+	}
   // this.ctx.beginPath();
   // this.ctx.arc(x,y,halfsize,0,2*Math.PI);
   // this.ctx.fill();
@@ -201,13 +207,14 @@ io.on("connection", function(socket){
 		drawHistory(frameTime, loops);
 	})
 
-	socket.on("draw", function(wall,x,y,brushSize, color){
+	socket.on("draw", function(wall,x,y,brushSize, color,brushType){
 		// (x,y,brushSize, color)
 		// console.log("someone is drawing at " + x + " " + y + " brush:" + brushSize + " color " + color);
-		walls[wall].draw(x,y,brushSize,color);
-		socket.broadcast.emit("draw",wall,x,y,brushSize,color);
+		// console.log(brushType);
+		walls[wall].draw(x,y,brushSize,color,brushType);
+		socket.broadcast.emit("draw",wall,x,y,brushSize,color,brushType);
 
-		writeLog(wall,x,y,brushSize,color);
+		writeLog(wall,x,y,brushSize,color,brushType);
 
 	});
 
@@ -217,7 +224,7 @@ io.on("connection", function(socket){
 
 });
 
-function writeLog(wall, x, y, brushSize, color) {
+function writeLog(wall, x, y, brushSize, color,brushType) {
 	// var d;
 	// d.wall = wall;
 	// d.x = x;
@@ -225,7 +232,7 @@ function writeLog(wall, x, y, brushSize, color) {
 	// d.brushSize = brushSize;
 	// d.color = color;
 	t = new Date().getTime();
-	var data = t + " " + wall + " " + x + " " + y + " " + brushSize + " " + color + "\n";
+	var data = t + " " + wall + " " + x + " " + y + " " + brushSize + " " + color + " " + brushType + "\n";
 	fs.appendFile('drawLog.txt', data, function (err) {
 
 	});
@@ -302,4 +309,45 @@ function getDate() {
 
 	var date = y+ '-'+mo+ '-'+day+ '-'+h+ '-'+m+ '-'+s;
 	return date;
+}
+
+
+
+
+function drawCircle(context, cx, cy, d) {
+		if(d%2 == 1) {
+			cx-=1;
+			cy-=1;
+		}
+		if(d==3){
+			drawPixel(context,cx,cy);
+			drawPixel(context,cx+1,cy);
+			drawPixel(context,cx,cy+1);
+			drawPixel(context,cx-1,cy);
+			drawPixel(context,cx,cy-1);
+			return;
+		}
+	var x,y;
+	var r = Math.floor(d/2);
+		for (let i = -r; i<=r; i+=1) {
+				for (let j = -r; j<=r; j+=1) {
+					x = i;
+					y = j;
+					if(d%2 == 0) {
+						if(i>0) {
+							x=i+1;
+						}
+						if(j>0) {
+							y=j+1;
+						}
+					}
+					if (  Math.round(Math.sqrt(x*x + y*y)) <= r){
+							drawPixel(context,i + cx, j + cy)
+					}
+				}
+		}
+}
+
+function drawPixel(context,x,y) {
+	context.fillRect(x,y,1,1);
 }

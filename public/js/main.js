@@ -401,7 +401,7 @@ function changeColor(col){
 	// document.getElementById("cursor").style.backgroundColor = col;
 }
 
-function drawOnWall(i, x,y,brushSize,color){
+function drawOnWall(i, x,y,brushSize,color,brushType){
 	walls[i].obj.canvas._draw(x,y,brushSize,color,brushType);
 }
 

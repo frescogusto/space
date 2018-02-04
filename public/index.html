@@ -200,9 +200,9 @@
 				can.loadImage(_canvas);
 			});
 
-			socket.on("draw", function(i,x,y,brushSize,color){
+			socket.on("draw", function(i,x,y,brushSize,color,brushType){
 				console.log("someone is drawing on wall " +i);
-				drawOnWall(i,x,y,brushSize,color);
+				drawOnWall(i,x,y,brushSize,color,brushType);
 			});
 
 			// window.addEventListener("beforeunload", function (event) {
