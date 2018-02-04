@@ -95,7 +95,7 @@ cursorTexture.magFilter = THREE.NearestFilter;
 cursorTexture.minFilter = THREE.NearestFilter;
 cursorTexture.generateMipmaps = false;
 cursorTexture.canvas = document.createElement( "canvas" );
-cursorTexture.canvas.width = cursorTexture.canvas.height = 128;
+cursorTexture.canvas.width = cursorTexture.canvas.height = 256;
 cursorTexture.context = cursorTexture.canvas.getContext("2d");
 cursorTexture.image = cursorTexture.canvas;
 cursorTexture.context.fillStyle = "white";
@@ -364,17 +364,18 @@ function changeBrushSize(offset){
 
 function setBrushSize(size) {
 
+	if(size>256) size = 256;
 	brushSize = parseInt(size);
 	cursorPlane.scale.set(brushSize/64,brushSize/64,brushSize/64);
 	// console.log(cursorPlane.material.map);
 	if(brushType == 1) { // if brush is circle
 		cursorTexture.repeat.x = 1/(cursorTexture.canvas.width/brushSize);
 		cursorTexture.repeat.y = 1/(cursorTexture.canvas.height/brushSize);
-		cursorTexture.context.clearRect(0,128-brushSize,brushSize,brushSize);
-		drawCircle(cursorTexture.context,Math.round(brushSize/2),Math.round(128-brushSize/2),brushSize);
+		cursorTexture.context.clearRect(0,cursorTexture.canvas.height-brushSize,brushSize,brushSize);
+		drawCircle(cursorTexture.context,Math.round(brushSize/2),Math.round(cursorTexture.canvas.height-brushSize/2),brushSize);
 	}
 	else if (brushType == 0) {
-		cursorTexture.context.fillRect(0,128-brushSize,brushSize,brushSize);
+		cursorTexture.context.fillRect(0,cursorTexture.canvas.height-brushSize,brushSize,brushSize);
 	}
 	cursorTexture.needsUpdate = true;
 
