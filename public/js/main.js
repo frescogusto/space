@@ -7,6 +7,9 @@ if ( ! Detector.webgl ) {
 }
 
 var guiOn=false;
+var isMobile = false;
+var mobileControls;
+
 //////
 
 var scene = new THREE.Scene();
@@ -265,7 +268,17 @@ jscolor.installByClassName("jscolor");
 showGui();
 
 
-
+if (window.DeviceOrientationEvent && 'ontouchstart' in window) {
+		// setup real compass thing, with event.alpha
+		isMobile = true;
+		hideGui();
+		document.querySelector(".inventory").style.display = "none";
+		mobileControls = new THREE.DeviceOrientationControls( camera );
+		cursorPlane.visible = false;
+} else {
+		// setup some mouse following hack
+		isMobile = false;
+}
 
 
 // console.log("hash = " + window.location.hash);
@@ -462,58 +475,46 @@ updateRaycast();
 
 // controls.getObject().position.set(0,0,0);
 
-	var time = performance.now();
-						var delta = ( time - prevTime ) / 1000;
+	if(!isMobile) {
+		var time = performance.now();
+		var delta = ( time - prevTime ) / 1000;
 
-						velocity.x -= velocity.x * spd*0.5 * delta;
-						velocity.z -= velocity.z * spd*0.5 * delta;
+		velocity.x -= velocity.x * spd*0.5 * delta;
+		velocity.z -= velocity.z * spd*0.5 * delta;
 
-						// velocity.y -= 9.8 * 1.0 * delta; // 100.0 = mass
+		if ( moveForward ) velocity.z -= spd * delta;
+		if ( moveBackward ) velocity.z += spd * delta;
 
-						if ( moveForward ) velocity.z -= spd * delta;
-						if ( moveBackward ) velocity.z += spd * delta;
+		if ( moveLeft ) velocity.x -= spd * delta;
+		if ( moveRight ) velocity.x += spd * delta;
 
-						if ( moveLeft ) velocity.x -= spd * delta;
-						if ( moveRight ) velocity.x += spd * delta;
+		controls.getObject().translateX( velocity.x * delta );
+		controls.getObject().translateY( velocity.y * delta );
+		controls.getObject().translateZ( velocity.z * delta );
 
-						// if ( isOnObject === true ) {
-						// 	velocity.y = Math.max( 0, velocity.y );
-						//
-						// 	canJump = true;
-						// }
+		if(controls.getObject().position.x > roomWidth/2 - offset)
+			controls.getObject().position.x = roomWidth/2 - offset;
+		if(controls.getObject().position.x < -roomWidth/2 + offset)
+			controls.getObject().position.x = -roomWidth/2 + offset;
+		if(controls.getObject().position.z > roomDepth/2 - offset)
+			controls.getObject().position.z = roomDepth/2 - offset;
+		if(controls.getObject().position.z < -roomDepth/2 + offset)
+			controls.getObject().position.z = -roomDepth/2 + offset;
 
-						controls.getObject().translateX( velocity.x * delta );
-						controls.getObject().translateY( velocity.y * delta );
-						controls.getObject().translateZ( velocity.z * delta );
+		if ( controls.getObject().position.y < -roomHeight/2 +1 ) {
 
-						if(controls.getObject().position.x > roomWidth/2 - offset)
-							controls.getObject().position.x = roomWidth/2 - offset;
-						if(controls.getObject().position.x < -roomWidth/2 + offset)
-							controls.getObject().position.x = -roomWidth/2 + offset;
-						if(controls.getObject().position.z > roomDepth/2 - offset)
-							controls.getObject().position.z = roomDepth/2 - offset;
-						if(controls.getObject().position.z < -roomDepth/2 + offset)
-							controls.getObject().position.z = -roomDepth/2 + offset;
+			velocity.y = 0;
+			controls.getObject().position.y = -roomHeight/2 +1;
 
-						if ( controls.getObject().position.y < -roomHeight/2 +1 ) {
+		}
 
-							velocity.y = 0;
-							controls.getObject().position.y = -roomHeight/2 +1;
-
-						}
-
-						// camera.position.y = -10;
-
-						prevTime = time;
+		prevTime = time;
+	}
+	else { // mobile controls
+		mobileControls.update();
+	}
 
 
-						// cursor.position.set(window.innerWidth/2,window.innerHeight/2,0);
-
-					// controls.getObject().position.set(0,0,0);
-// sphere.position.set(controls.getObject().position.x,controls.getObject().position.y,controls.getObject().position.z);
-
-	// camera.rotation.x = pitchObject.x;
-	// camera.rotation.y = yawObject.y;
 
 	renderer.render(scene, camera);
 };
