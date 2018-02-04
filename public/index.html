@@ -2,127 +2,9 @@
 <html>
 	<head>
 		<meta charset=utf-8>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<title>superinternet.space</title>
-		<style>
-		html{
-			font-size: 14px;
-			user-select: none;
-			-moz-user-select: none;
-			-webkit-user-select: none;
-		}
-			body {
-				margin: 0; overflow: hidden;
-				font-family: helvetica, sans-serif;
-				font-size: 1rem;
-			}
-			canvas { width: 100%; height: 100%}
-		#cursor{
-			background-image: none;
-			background-size: contain;
-			width: 30px;
-			height: 30px;
-			position: absolute;
-			top: calc(50% - 30px);
-			left: calc(50% - 0px);
-		}
-		#gui{
-			display: none;
-			width: 100%;
-			height: 10vh;
-			position: absolute;
-			top: 0;
-		}
-		input{
-			padding: 0;
-			border:none;
-			display: block;
-			height: 20px;
-			font-size: 1rem;
-		}
-		textarea, input, button { outline: none; }
-
-		input[type=range]
-		{
-		    width: calc(100% - 10px);
-		    height: 15px;
-				-webkit-appearance: none;
-		    appearance: none;
-				border: 5px solid black;
-				background: #ccc;
-				margin: 5px 0 0 0;
-		}
-		input[type=range]::-webkit-slider-thumb {
-			-webkit-appearance: none;
-			background: black;
-			height: 15px;
-			width: 5px;
-		}
-		input[type=range]::-moz-range-thumb {
-			-webkit-appearance: none;
-			background: black;
-			height: 15px;
-			width: 5px;
-		}
-		.gui {
-			background: white;
-			border: 5px solid black;
-			margin: 5px 0 0 5px;
-			padding: 5px;
-			min-width: 50px;
-			/* max-width: 200px; */
-			max-height: 50px;
-			min-height: 50px;
-
-			text-align: center;
-			display: flex;
-		  justify-content: center;
-		  align-items: center;
-		}
-		.colors {
-			max-width: 121px;
-			text-align: center;
-			font-size: 1rem;
-		}
-		.info {
-			position: absolute;
-			max-height: none;
-			display: block;
-			top: 0px;
-			right: 5px;
-			width: 25%;
-		}
-		.info ul {
-			margin: 0;
-			padding: 0;
-			list-style-type: none;
-			text-align: left;
-		}
-		ul li {
-			margin-bottom: 10px;
-
-		}
-		a {
-			color: red;
-		}
-		.inventory{
-			width: 100%;
-			position: absolute;
-			bottom: 0;
-			display: flex;
-		  justify-content: center;
-		  align-items: center;
-		}
-		.item {
-			width: 30px;
-			height: 30px;
-			border: 5px solid black;
-			background: white;
-			margin: 0 5px 5px 0;
-		}
-		.item.selected {
-			outline: 5px solid white;
-		}
-		</style>
+		<link rel="stylesheet" type="text/css" href="/style.css">
 	</head>
 	<body>
 
@@ -141,24 +23,31 @@
 				</div>
 			</div>
 
+			<div class="gui brushType" onclick="setBrushType(0);">
+				square<br>brush
+			</div>
+			<div class="gui brushType" onclick="setBrushType(1);">
+				circle<br>brush
+			</div>
 
 			<div class="gui picker" onclick="setTool(1);">
 				<img src="img/eyedrop.png" alt="">
 			</div>
 			<div class="gui share" onclick="saveCubemap();">
-				save 360
+				save<br>360
 			</div>
 
 			<div class="gui info">
 				<!-- <h2>ciao</h2> -->
 				<ul>
-					<li>benvenuto a <a href="#">superinterent.space</a>, dove puoi giocare con i disegnio life</li>
-					<li>muoviti con "wasd" o "frecce"</li>
-					<li>premi numeri per selezionari i tuoi colori perferiti</li>
-					<li>premi "i" per color picker</li>
-					<li>premi "o" e "p" per pennel size, oppure usa il coso in alto a sinistra</li>
-					<li>premi "save 360" per salvare la merda e shararla su facebook di merda mark zuckerberg figlio di puttana</li>
-					<li>premi "barra spazio" per tornare a questo menu</li>
+					<li><h3>welcome to <a href="#">superinterent.space</a>!1</h3></li>
+					<li>move with <b>wasd</b> or <b>arrows</b></li>
+					<li>press <b>numbers</b> to select your favourite colors</li>
+					<li>press <b>O</b> and <b>P</b> for brush size</li>
+					<li>press <b>K</b> and <b>L</b> for brush type</li>
+					<li>press <b>I</b> for the color picker</li>
+					<li>press <b>save 360</b> to save shit and share it on facebook shit mark zuckerberg motherfuck</li>
+					<li>press <b>spacebar</b> to come back to this menu</li>
 				</ul>
 			</div>
 		</div>
