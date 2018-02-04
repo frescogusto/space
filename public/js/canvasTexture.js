@@ -15,39 +15,10 @@ CanvasTexture = function ( parentTexture, w, h) {
 
 				var that = this;
 				this._background = document.createElement( "img" );
-				this._background.addEventListener( "load", function ( event ) {
-
-					that._canvas.width = that._background.naturalWidth;
-					that._canvas.height = that._background.naturalHeight;
-
-					that._crossRadius = Math.ceil( Math.min( that._canvas.width, that._canvas.height / 30 ) );
-					that._crossMax = Math.ceil( 0.70710678 * that._crossRadius );
-					that._crossMin = Math.ceil( that._crossMax / 10 );
-					that._crossThickness = Math.ceil( that._crossMax / 10 );
-
-					that._draw();
-
-				}, false );
 				this._background.crossOrigin = '';
 
 				this._context2D.fillStyle = "#ffffff";
 				this._context2D.fillRect(0,0,this._canvas.width,this._canvas.height);
-
-				// for(var i=0; i<this._canvas.width; i++){
-				// 	for(var j=0; j<this._canvas.height; j++){
-				// 		ran = Math.round(Math.random()*200)+55 + j;
-				// 		// ran = Math.round(Math.random()*150)+105 ;
-				// 		// ran = j*Math.sin(i);
-				// 		// ran = (i % 2 ? 0 : 1) + (j % 2 ? 0 : 1);
-				// 		// ran = i % 2 * j % 2;
-				// 		// ran = ran * 100 + 200;
-				//
-				// 		this._context2D.fillStyle = "rgba("+ran+","+ran+","+ran+",255)";
-				// 		this._context2D.fillRect( i, j, 1, 1 );
-				// 	}
-				// }
-
-				// this._background.src = "textures/UV_Grid_Sm.jpg";
 
 				this._draw();
 
@@ -60,14 +31,6 @@ CanvasTexture.prototype = {
 
 	_canvas: null,
 	_context2D: null,
-	_xCross: 0,
-	_yCross: 0,
-
-	_crossRadius: 57,
-	_crossMax: 40,
-	_crossMin: 4,
-	_crossThickness: 4,
-
 	_parentTexture: [],
 
 	addParent: function ( parentTexture ) {
@@ -81,43 +44,10 @@ CanvasTexture.prototype = {
 
 	},
 
-	setCrossPosition: function ( x, y, brushSize ) {
-
-		this._xCross = x * this._canvas.width;
-		this._yCross = y * this._canvas.height;
-
-		this._draw();
-
-	},
-
 	_draw: function (x,y,brushSize, color) {
 
 		if ( ! this._context2D ) return;
 
-		// this._context2D.fillStyle = "#cccfff";
-		// this._context2D.clearRect( 0, 0, this._canvas.width, this._canvas.height )
-
-		// Background.
-		// this._context2D.drawImage( this._background, 0, 0 );
-
-		// Yellow cross.
-		// this._context2D.lineWidth = this._crossThickness * 3;
-		// this._context2D.strokeStyle = "#0000ff";
-		//
-		// this._context2D.beginPath();
-		// this._context2D.moveTo( this._xCross - this._crossMax - 2, this._yCross - this._crossMax - 2 );
-		// this._context2D.lineTo( this._xCross - this._crossMin, this._yCross - this._crossMin );
-		//
-		// this._context2D.moveTo( this._xCross + this._crossMin, this._yCross + this._crossMin );
-		// this._context2D.lineTo( this._xCross + this._crossMax + 2, this._yCross + this._crossMax + 2 );
-		//
-		// this._context2D.moveTo( this._xCross - this._crossMax - 2, this._yCross + this._crossMax + 2 );
-		// this._context2D.lineTo( this._xCross - this._crossMin, this._yCross + this._crossMin );
-		//
-		// this._context2D.moveTo( this._xCross + this._crossMin, this._yCross - this._crossMin );
-		// this._context2D.lineTo( this._xCross + this._crossMax + 2, this._yCross - this._crossMax - 2 );
-		//
-		// this._context2D.stroke();
 		x *= this._canvas.width;
 		y *= this._canvas.height;
 		x = Math.round(x);
@@ -135,9 +65,9 @@ CanvasTexture.prototype = {
 		// 	}
 		// }
 
-		this._context2D.fillRect(x-halfsize,y-halfsize,size,size); // SQUARE BRUSH
+		// this._context2D.fillRect(x-halfsize,y-halfsize,size,size); // SQUARE BRUSH
 
-		// drawCircle(this._context2D, x,y,size);
+		drawCircle(this._context2D, x,y,size);
 
 
 
@@ -198,17 +128,47 @@ CanvasPlane = function(_width, _height){
 
 }
 
-function drawCircle(context,x,y,size){
 
-	halfsize = Math.floor(size/2);
-	// brushSize = Math.round(size);
-	for ( var i=0; i<size; i++){
-		for ( var j=0; j<size; j++){
-			var d = Math.round(Math.sqrt((halfsize-i)*(halfsize-i) + (halfsize-j)*(halfsize-j)));
-			if(d > halfsize){
-				context.fillRect(x+i-halfsize,y+j-halfsize,1,1);
-			}
+function drawCircle(context, cx, cy, d) {
+
+		if(d%2 == 1) {
+			cx-=1;
+			cy-=1;
 		}
-	}
+		if(d==3){
+			drawPixel(context,cx,cy);
+			drawPixel(context,cx+1,cy);
+			drawPixel(context,cx,cy+1);
+			drawPixel(context,cx-1,cy);
+			drawPixel(context,cx,cy-1);
+			return;
+		}
 
+	var x,y;
+	var r = Math.floor(d/2);
+		for (let i = -r; i<=r; i+=1) {
+				for (let j = -r; j<=r; j+=1) {
+
+					x = i;
+					y = j;
+
+					if(d%2 == 0) {
+						if(i>0) {
+							x=i+1;
+						}
+						if(j>0) {
+							y=j+1;
+						}
+					}
+
+					if (  Math.round(Math.sqrt(x*x + y*y)) <= r){
+							drawPixel(context,i + cx, j + cy)
+					}
+
+				}
+		}
+}
+
+function drawPixel(context,x,y) {
+	context.fillRect(x,y,1,1);
 }

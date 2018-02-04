@@ -114,9 +114,38 @@ var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
 material.polygonOffset = true;
 material.depthTest = true;
 // material.depthWrite = false;
-material.polygonOffsetFactor = -100; // fix z-fighting
+material.polygonOffsetFactor = -1; // fix z-fighting
 material.polygonOffsetUnits = 0.1;
-var cursorPlane = new THREE.Mesh( geometry, material );
+
+var cursorTexture = new THREE.Texture( undefined, THREE.UVMapping, THREE.RepeatWrapping, THREE.RepeatWrapping );
+cursorTexture.magFilter = THREE.NearestFilter;
+cursorTexture.minFilter = THREE.NearestFilter;
+cursorTexture.generateMipmaps = false;
+cursorTexture.canvas = document.createElement( "canvas" );
+cursorTexture.canvas.width = cursorTexture.canvas.height = 128;
+cursorTexture.context = cursorTexture.canvas.getContext("2d");
+cursorTexture.image = cursorTexture.canvas;
+console.log(cursorTexture);
+var cursorMaterial = new THREE.MeshBasicMaterial( { map: cursorTexture, transparent:true } );
+cursorMaterial.polygonOffset = true;
+cursorMaterial.polygonOffsetFactor = -1; // fix z-fighting
+cursorMaterial.polygonOffsetUnits = 0.1;
+
+// for(var i=0; i< cursorTexture.canvas.width; i++){ // SPRAY BRUSH
+// 	for(var j=0; j< cursorTexture.canvas.height; j++){
+// 		if(Math.random() < 0.2){
+// 			cursorTexture.context.fillStyle = "white";
+// 			cursorTexture.context.fillRect(i,j,1,1);
+// 		}
+// 	}
+// }
+			cursorTexture.context.fillStyle = "white";
+			// cursorTexture.context.fillRect(0,0,1,1);
+			// cursorTexture.context.fillRect(0,127,1,1);
+			drawCircle(cursorTexture.context,brushSize/2,127-brushSize/2,brushSize);
+cursorTexture.needsUpdate = true;
+
+var cursorPlane = new THREE.Mesh( geometry, cursorMaterial );
 scene.add( cursorPlane );
 
 // var sphere = new THREE.Mesh( new THREE.SphereGeometry(0.1,8,8), new THREE.MeshBasicMaterial( { color: 0xff0000 } ));
@@ -370,6 +399,17 @@ function setBrushSize(size) {
 
 	brushSize = parseInt(size);
 	cursorPlane.scale.set(brushSize/64,brushSize/64,brushSize/64);
+	// console.log(cursorPlane.material.map);
+	cursorTexture.repeat.x = 1/(cursorTexture.canvas.width/brushSize);
+	cursorTexture.repeat.y = 1/(cursorTexture.canvas.height/brushSize);
+
+	cursorTexture.fillStyle = "black";
+	cursorTexture.context.clearRect(0,128-brushSize,brushSize,brushSize);
+	cursorTexture.fillStyle = "white";
+	drawCircle(cursorTexture.context,Math.round(brushSize/2),Math.round(128-brushSize/2),brushSize);
+	cursorTexture.needsUpdate = true;
+	// cursorPlane.material.map.canvas.width = cursorPlane.material.map.canvas.height = brushSize;
+
 	document.querySelector(".brushSizeVal").innerHTML = "brush size: " + size;
 	document.querySelector("#brushSize").value = size;
 	// console.log(brushSize);
