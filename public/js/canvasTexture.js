@@ -44,7 +44,7 @@ CanvasTexture.prototype = {
 
 	},
 
-	_draw: function (x,y,brushSize, color) {
+	_draw: function (x,y,brushSize, color,brushType) {
 
 		if ( ! this._context2D ) return;
 
@@ -65,9 +65,13 @@ CanvasTexture.prototype = {
 		// 	}
 		// }
 
-		// this._context2D.fillRect(x-halfsize,y-halfsize,size,size); // SQUARE BRUSH
+		if(brushType == 0) {
+				this._context2D.fillRect(x-halfsize,y-halfsize,size,size); // SQUARE BRUSH
+		}
+		else if(brushType==1) {
+			drawCircle(this._context2D, x,y,size);
+		}
 
-		drawCircle(this._context2D, x,y,size);
 
 
 

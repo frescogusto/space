@@ -30,6 +30,7 @@ var roomWidth = 8;
 var roomHeight = 4;
 var roomDepth = 8;
 
+var brushType = 0;
 var brushSize = 10;
 var drawColor = "black";
 var colors = [10];
@@ -88,35 +89,7 @@ plane.number = 5;
 scene.add( plane );
 walls.push(plane);
 
-// console.log(walls[0]);
-// plane = new CanvasPlane(4,2).plane;
-// plane.position.set(-2,0,2);
-// plane.rotation.set(0,Math.PI/2,0);
-// scene.add( plane );
-//
-// plane = new CanvasPlane(4,2).plane;
-// plane.position.set(2,0,2);
-// plane.rotation.set(0,-Math.PI/2,0);
-// scene.add( plane );
-//
-// plane = new CanvasPlane(4,4).plane;
-// plane.position.set(0,-1,2);
-// plane.rotation.set(-Math.PI/2,0,0);
-// scene.add( plane );
-//
-// plane = new CanvasPlane(4,4).plane;
-// plane.position.set(0,1,2);
-// plane.rotation.set(Math.PI/2,0,0);
-// scene.add( plane );
-
 var geometry = new THREE.PlaneGeometry( 1,1);
-var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
-material.polygonOffset = true;
-material.depthTest = true;
-// material.depthWrite = false;
-material.polygonOffsetFactor = -1; // fix z-fighting
-material.polygonOffsetUnits = 0.1;
-
 var cursorTexture = new THREE.Texture( undefined, THREE.UVMapping, THREE.RepeatWrapping, THREE.RepeatWrapping );
 cursorTexture.magFilter = THREE.NearestFilter;
 cursorTexture.minFilter = THREE.NearestFilter;
@@ -125,25 +98,12 @@ cursorTexture.canvas = document.createElement( "canvas" );
 cursorTexture.canvas.width = cursorTexture.canvas.height = 128;
 cursorTexture.context = cursorTexture.canvas.getContext("2d");
 cursorTexture.image = cursorTexture.canvas;
-console.log(cursorTexture);
+cursorTexture.context.fillStyle = "white";
+// console.log(cursorTexture);
 var cursorMaterial = new THREE.MeshBasicMaterial( { map: cursorTexture, transparent:true } );
 cursorMaterial.polygonOffset = true;
 cursorMaterial.polygonOffsetFactor = -1; // fix z-fighting
 cursorMaterial.polygonOffsetUnits = 0.1;
-
-// for(var i=0; i< cursorTexture.canvas.width; i++){ // SPRAY BRUSH
-// 	for(var j=0; j< cursorTexture.canvas.height; j++){
-// 		if(Math.random() < 0.2){
-// 			cursorTexture.context.fillStyle = "white";
-// 			cursorTexture.context.fillRect(i,j,1,1);
-// 		}
-// 	}
-// }
-			cursorTexture.context.fillStyle = "white";
-			// cursorTexture.context.fillRect(0,0,1,1);
-			// cursorTexture.context.fillRect(0,127,1,1);
-			drawCircle(cursorTexture.context,brushSize/2,127-brushSize/2,brushSize);
-cursorTexture.needsUpdate = true;
 
 var cursorPlane = new THREE.Mesh( geometry, cursorMaterial );
 scene.add( cursorPlane );
@@ -199,6 +159,12 @@ if(event.keyCode ==48) {
 							// 	saveCubemap();
 							// 	break;
 
+							case 75: // K
+								setBrushType(0);
+								break;
+							case 76: // L
+								setBrushType(1);
+								break;
 
 							case 73:
 								setTool(1)
@@ -292,6 +258,7 @@ setColor(9,"333333");
 
 controls.getObject().position.set(0,-roomHeight/2 +1,0);
 changeBrushSize(0);
+setBrushType(1);
 changeColor("000000");
 
 jscolor.installByClassName("jscolor");
@@ -330,8 +297,8 @@ function updateRaycast(){
 			intersects[i].object.material.map.transformUv( uv );
 
 			if(tool == 0 && !firstClick){
-				drawOnWall(num,uv.x,uv.y,brushSize,drawColor);
-				socket.emit("draw",num,uv.x,uv.y,brushSize,drawColor);
+				drawOnWall(num,uv.x,uv.y,brushSize,drawColor,brushType);
+				socket.emit("draw",num,uv.x,uv.y,brushSize,drawColor,brushType);
 			}
 			else if(tool == 1){
 					getPixel(num,uv.x,uv.y);
@@ -400,26 +367,32 @@ function setBrushSize(size) {
 	brushSize = parseInt(size);
 	cursorPlane.scale.set(brushSize/64,brushSize/64,brushSize/64);
 	// console.log(cursorPlane.material.map);
-	cursorTexture.repeat.x = 1/(cursorTexture.canvas.width/brushSize);
-	cursorTexture.repeat.y = 1/(cursorTexture.canvas.height/brushSize);
-
-	cursorTexture.fillStyle = "black";
-	cursorTexture.context.clearRect(0,128-brushSize,brushSize,brushSize);
-	cursorTexture.fillStyle = "white";
-	drawCircle(cursorTexture.context,Math.round(brushSize/2),Math.round(128-brushSize/2),brushSize);
+	if(brushType == 1) { // if brush is circle
+		cursorTexture.repeat.x = 1/(cursorTexture.canvas.width/brushSize);
+		cursorTexture.repeat.y = 1/(cursorTexture.canvas.height/brushSize);
+		cursorTexture.context.clearRect(0,128-brushSize,brushSize,brushSize);
+		drawCircle(cursorTexture.context,Math.round(brushSize/2),Math.round(128-brushSize/2),brushSize);
+	}
+	else if (brushType == 0) {
+		cursorTexture.context.fillRect(0,128-brushSize,brushSize,brushSize);
+	}
 	cursorTexture.needsUpdate = true;
-	// cursorPlane.material.map.canvas.width = cursorPlane.material.map.canvas.height = brushSize;
 
 	document.querySelector(".brushSizeVal").innerHTML = "brush size: " + size;
 	document.querySelector("#brushSize").value = size;
 	// console.log(brushSize);
 }
 
+function setBrushType(type) {
+	brushType = type;
+	setBrushSize(brushSize);
+}
 
 function changeColor(col){
 	// console.log(col.toString());
 	drawColor = "#"+col;
-	cursorPlane.material.color = new THREE.Color(parseInt("0x"+col));
+	cursorMaterial.color = new THREE.Color(parseInt("0x"+col));
+	// console.log(cursorMaterial);
 	if(document.getElementById("colorpicker").jscolor ){
 		document.getElementById('colorpicker').jscolor.fromString(col.toString());
 		// console.log(document.getElementById('colorpicker').jscolor);
@@ -429,7 +402,7 @@ function changeColor(col){
 }
 
 function drawOnWall(i, x,y,brushSize,color){
-	walls[i].obj.canvas._draw(x,y,brushSize,color);
+	walls[i].obj.canvas._draw(x,y,brushSize,color,brushType);
 }
 
 function getPixel(i, x, y){
