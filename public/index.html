@@ -8,6 +8,13 @@
 	</head>
 	<body>
 
+		<div class="loader">
+			<div>
+				LOADING SPACE<br><br>
+				<img class="spinner" src="img/loader2.png" alt="loading">
+			</div>
+		</div>
+
 		<div id="cursor"></div>
 
 		<div id="gui">
@@ -42,8 +49,9 @@
 				<ul>
 					<li><h3>welcome to <a href="#">superinterent.space</a>!1</h3></li>
 					<li>move with <b>wasd</b> or <b>arrows</b></li>
+					<li><b>click</b> to draw</li>
 					<li>press <b>numbers</b> to select your favourite colors</li>
-					<li>press <b>O</b> and <b>P</b> for brush size</li>
+					<li>press <b>Q</b> and <b>E</b> for brush size</li>
 					<li>press <b>K</b> and <b>L</b> for brush type</li>
 					<li>press <b>I</b> for the color picker</li>
 					<li>press <b>save 360</b> to save shit and share it on facebook shit mark zuckerberg motherfuck</li>
@@ -64,6 +72,8 @@
 			<div class="item">9</div>
 			<div class="item">0</div>
 		</div>
+
+
 
 
 
@@ -88,11 +98,16 @@
 				// console.log(can);
 				// console.log(_canvas);
 				can.loadImage(_canvas);
+				document.querySelector(".loader").style.display = "none";
 			});
 
 			socket.on("draw", function(i,x,y,brushSize,color,brushType){
-				console.log("someone is drawing on wall " +i);
+				// console.log("someone is drawing on wall " +i);
 				drawOnWall(i,x,y,brushSize,color,brushType);
+			});
+
+			socket.on("user connection", function(text){
+				console.log(text);
 			});
 
 			// window.addEventListener("beforeunload", function (event) {

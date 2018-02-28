@@ -150,8 +150,8 @@ function drawCircle(context, cx, cy, d) {
 
 	var x,y;
 	var r = Math.floor(d/2);
-		for (let i = -r; i<=r; i+=1) {
-				for (let j = -r; j<=r; j+=1) {
+		for (var i = -r; i<=r; i+=1) {
+				for (var j = -r; j<=r; j+=1) {
 
 					x = i;
 					y = j;

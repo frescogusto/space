@@ -190,8 +190,9 @@ function n(n){
 
 io.on("connection", function(socket){
 
-	console.log("USER CONNECTED");
-	socket.broadcast.emit("user connection", "user connected");
+	console.log(socket.id + " CONNECTED");
+	socket.broadcast.emit("user connection", "user connected: " + socket.id);
+	// console.log(socket.conn);
 
   // CHANGE THIS TO A CLIENT REQUEST
   for(var i=0; i<walls.length; i++){
@@ -200,7 +201,7 @@ io.on("connection", function(socket){
   }
 
 	socket.on("disconnect", function(){
-		console.log("DISCONNECTOOTOTO");
+		console.log(socket.id + " disconnected");
 	});
 
 	socket.on("drawHistory", function(frameTime,loops){

@@ -3,16 +3,18 @@ html{
   user-select: none;
   -moz-user-select: none;
   -webkit-user-select: none;
+  width: 100%;
+  height: 100%;
 }
 h1,h2,h3 {
   margin: 0;
 }
-  body {
-    margin: 0; overflow: hidden;
-    font-family: helvetica, sans-serif;
-    font-size: 1rem;
-  }
-  canvas { width: 100%; height: 100%}
+body {
+  margin: 0; overflow: hidden;
+  font-family: helvetica, sans-serif;
+  font-size: 1rem;
+}
+canvas { width: 100%; height: 100%}
 #cursor{
   background-image: none;
   background-size: contain;
@@ -125,4 +127,37 @@ a {
 }
 .picker img {
   height: 100%;
+}
+
+.loader {
+  width: 100%;
+  height: 100%;
+  background: aqua;
+  position: absolute;
+  z-index: 10001;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 3rem;
+  text-align: center;
+}
+
+.spinner {
+  animation: spin 1s infinite linear;
+  -webkit-animation: spin 1s infinite linear;
+  -moz-animation: spin 1s infinite linear;
+  -ms-animation: spin 1s infinite linear;
+}
+
+@-moz-keyframes spin {
+    from { -moz-transform: rotate(0deg); }
+    to { -moz-transform: rotate(360deg); }
+}
+@-webkit-keyframes spin {
+    from { -webkit-transform: rotate(0deg); }
+    to { -webkit-transform: rotate(360deg); }
+}
+@keyframes spin {
+    from {transform:rotate(0deg);}
+    to {transform:rotate(360deg);}
 }

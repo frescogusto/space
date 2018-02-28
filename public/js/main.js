@@ -142,110 +142,117 @@ function init(){
 	var onKeyDown = function ( event ) {
 // console.log(event.keyCode);
 
-if(event.keyCode >=49 && event.keyCode <= 57) {
-	switchColor(event.keyCode-49);
-}
-if(event.keyCode ==48) {
-	switchColor(9);
-}
+		if(event.keyCode >=49 && event.keyCode <= 57) {
+			switchColor(event.keyCode-49);
+		}
+		if(event.keyCode ==48) {
+			switchColor(9);
+		}
 
-						switch ( event.keyCode ) {
+		switch ( event.keyCode ) {
 
-							case 79:
-								changeBrushSize(-1);
-								break;
-							case 80:
-								changeBrushSize(1);
-								break;
+			case 79:
+				changeBrushSize(-1);
+				break;
+			case 80:
+				changeBrushSize(1);
+				break;
 
-							// case 48:
-							// 	saveCubemap();
-							// 	break;
+			case 81:
+				changeBrushSize(-1);
+				break;
+			case 69:
+				changeBrushSize(1);
+				break;
 
-							case 75: // K
-								setBrushType(0);
-								break;
-							case 76: // L
-								setBrushType(1);
-								break;
+			// case 48:
+			// 	saveCubemap();
+			// 	break;
 
-							case 73:
-								setTool(1)
-								break;
+			case 75: // K
+				setBrushType(0);
+				break;
+			case 76: // L
+				setBrushType(1);
+				break;
 
-							case 67:
-								// lockPointer();
-								toggleGui();
-								break;
+			case 73:
+				setTool(1)
+				break;
 
-							case 38: // up
-							case 87: // w
-								moveForward = true;
-								break;
+			case 67:
+				// lockPointer();
+				toggleGui();
+				break;
 
-							case 37: // left
-							case 65: // a
-								moveLeft = true; break;
+			case 38: // up
+			case 87: // w
+				moveForward = true;
+				break;
 
-							case 40: // down
-							case 83: // s
-								moveBackward = true;
-								break;
+			case 37: // left
+			case 65: // a
+				moveLeft = true; break;
 
-							case 39: // right
-							case 68: // d
-								moveRight = true;
-								break;
+			case 40: // down
+			case 83: // s
+				moveBackward = true;
+				break;
 
-							case 32: // space
-								// if ( canJump === true ) velocity.y += 350;
-								// canJump = false;
-								// this is where the developer updates the scene and creates a cubemap of the scene
-								toggleGui();
-								break;
+			case 39: // right
+			case 68: // d
+				moveRight = true;
+				break;
 
-						}
+			case 32: // space
+				// if ( canJump === true ) velocity.y += 350;
+				// canJump = false;
+				// this is where the developer updates the scene and creates a cubemap of the scene
+				toggleGui();
+				break;
 
-					};
+		}
 
-					var onKeyUp = function ( event ) {
+	};
 
-						switch( event.keyCode ) {
+	var onKeyUp = function ( event ) {
 
-							case 38: // up
-							case 87: // w
-								moveForward = false;
-								break;
+		switch( event.keyCode ) {
 
-							case 37: // left
-							case 65: // a
-								moveLeft = false;
-								break;
+			case 38: // up
+			case 87: // w
+				moveForward = false;
+				break;
 
-							case 40: // down
-							case 83: // s
-								moveBackward = false;
-								break;
+			case 37: // left
+			case 65: // a
+				moveLeft = false;
+				break;
 
-							case 39: // right
-							case 68: // d
-								moveRight = false;
-								break;
+			case 40: // down
+			case 83: // s
+				moveBackward = false;
+				break;
 
-						}
+			case 39: // right
+			case 68: // d
+				moveRight = false;
+				break;
 
-					};
+		}
 
-					document.addEventListener( 'keydown', onKeyDown, false );
-					document.addEventListener( 'keyup', onKeyUp, false );
-					window.addEventListener( 'resize', onWindowResize, false );
+	};
 
-					document.getElementById("brushSize").addEventListener("input", function() {
-					    // this.textContent = rangeInput.value;
-							setBrushSize(this.value);
+	document.addEventListener( 'keydown', onKeyDown, false );
+	document.addEventListener( 'keyup', onKeyUp, false );
+	window.addEventListener( 'resize', onWindowResize, false );
 
-							// console.log(this);
-					}, false);
+	document.getElementById("brushSize").addEventListener("input", function() {
+	    // this.textContent = rangeInput.value;
+			setBrushSize(this.value);
+
+			// console.log(this);
+	}, false);
 
 
 setColor(0,"000000");
@@ -330,35 +337,41 @@ function updateCursorPlane(point, rot){
 	var y = Math.round(point.y*64)/64;
 	var z = Math.round(point.z*64)/64;
 
-	if(brushSize%2 != 0){ // align to pixel when width is odd
+	if(brushSize%2 != 0 ){ // align to pixel when width is odd
 			// console.log(rot);
 			// console.log(point);
+
+			var offset = 1/128; // half pixel
+			if(tool == 1) {
+				offset = -1/128; // color piker offset
+			}
+
 			if(rot._x == 0) {
 				if(rot._y == 0) { // parete che vedi all inizio
-					y += 1/128;
-					x -= 1/128;
+					y += offset;
+					x -= offset;
 				}
 				else if(rot._y == Math.PI/2) { // left wall
-					y += 1/128;
-					z += 1/128;
+					y += offset;
+					z += offset;
 				}
 				else if(rot._y == Math.PI) { // back wall
-					y += 1/128;
-					x += 1/128;
+					y += offset;
+					x += offset;
 				}
 				else if(rot._y == -Math.PI/2) { // right wall
-					y += 1/128;
-					z -= 1/128;
+					y += offset;
+					z -= offset;
 				}
 			}
 			else {
 				if(rot._x < 0) { // pavement
-					x -= 1/128;
-					z -= 1/128;
+					x -= offset;
+					z -= offset;
 				}
 				else if(rot._x > 0) { // ceiling
-					x -= 1/128;
-					z += 1/128;
+					x -= offset;
+					z += offset;
 				}
 			}
 
@@ -426,6 +439,7 @@ function getPixel(i, x, y){
 	console.log(col);
 	changeColor(col);
 	setTool(0);
+	// setBrushType(brushType);
 	changeBrushSize(0); // resets cursorPlane size
 
 }
@@ -542,87 +556,6 @@ function onWindowResize() {
 
 			}
 
-
-
-	//
-	// var havePointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;
-	// if ( havePointerLock ) {
-	//
-	// 	var element = document.body;
-	// 	var pointerlockchange = function ( event ) {
-	// 		if ( document.pointerLockElement === element || document.mozPointerLockElement === element || document.webkitPointerLockElement === element ) {
-	// 			// controlsEnabled = true;
-	// 			controls.enabled = true;
-	// 			//
-	// 			// blocker.style.display = 'none';
-	// 		} else {
-	// 			controls.enabled = false;
-	// 			//
-	// 			// blocker.style.display = '-webkit-box';
-	// 			// blocker.style.display = '-moz-box';
-	// 			// blocker.style.display = 'box';
-	// 			//
-	// 			// instructions.style.display = '';
-	// 		}
-	// 	};
-	// 	var pointerlockerror = function ( event ) {
-	// 		// instructions.style.display = '';
-	// 	};
-	//
-	// 	// Hook pointer lock state change events
-	// 	document.addEventListener( 'pointerlockchange', pointerlockchange, false );
-	// 	document.addEventListener( 'mozpointerlockchange', pointerlockchange, false );
-	// 	document.addEventListener( 'webkitpointerlockchange', pointerlockchange, false );
-	//
-	// 	document.addEventListener( 'pointerlockerror', pointerlockerror, false );
-	// 	document.addEventListener( 'mozpointerlockerror', pointerlockerror, false );
-	// 	document.addEventListener( 'webkitpointerlockerror', pointerlockerror, false );
-	//
-	// 	document.addEventListener( 'click', function ( event ) {
-	//
-	// 		// instructions.style.display = 'none';
-	//
-	// 		// Ask the browser to lock the pointer
-	// 		element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
-	//
-	// 		// if ( /Firefox/i.test( navigator.userAgent ) ) {
-	// 		//
-	// 		// 	var fullscreenchange = function ( event ) {
-	// 		//
-	// 		// 		if ( document.fullscreenElement === element || document.mozFullscreenElement === element || document.mozFullScreenElement === element ) {
-	// 		//
-	// 		// 			document.removeEventListener( 'fullscreenchange', fullscreenchange );
-	// 		// 			document.removeEventListener( 'mozfullscreenchange', fullscreenchange );
-	// 		//
-	// 		// 			element.requestPointerLock();
-	// 		// 		}
-	// 		//
-	// 		// 	};
-	// 		//
-	// 		// 	document.addEventListener( 'fullscreenchange', fullscreenchange, false );
-	// 		// 	document.addEventListener( 'mozfullscreenchange', fullscreenchange, false );
-	// 		//
-	// 		// 	element.requestFullscreen = element.requestFullscreen || element.mozRequestFullscreen || element.mozRequestFullScreen || element.webkitRequestFullscreen;
-	// 		//
-	// 		// 	element.requestFullscreen();
-	// 		//
-	// 		// } else {
-	// 		//
-	// 		// 	element.requestPointerLock();
-	// 		//
-	// 		// }
-	//
-	// 		element.requestPointerLock();
-	//
-	// 	}, false );
-	//
-	// } else {
-	//
-	// console.log("Your browser doesn\'t seem to support Pointer Lock API");
-	// 	// instructions.innerHTML = 'Your browser doesn\'t seem to support Pointer Lock API';
-	//
-	// }
-
 renderer.domElement.addEventListener( 'click', function ( event ) {
 
 	// element = document.body;
@@ -633,9 +566,6 @@ renderer.domElement.addEventListener( 'click', function ( event ) {
 	// document.getElementById('colorpicker').jscolor.hide();
 	// cursorLocked = true;
 	hideGui();
-
-
-	// lockPointer();
 
 });
 
@@ -735,6 +665,10 @@ function setTool(_tool) {
 	}
 	else if(tool==1) {
 		cursorPlane.scale.set(1/64,1/64,1/64);
+		cursorTexture.repeat.x = 1/(cursorTexture.canvas.width/1);
+		cursorTexture.repeat.y = 1/(cursorTexture.canvas.height/1);
+		cursorTexture.context.fillRect(0,cursorTexture.canvas.height-1,1,1);
+		cursorTexture.needsUpdate = true;
 		cursor.style.backgroundImage = "url('img/eyedrop.png')";
 	}
 }
