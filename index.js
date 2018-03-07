@@ -13,16 +13,52 @@ var Image = Canvas.Image;
 var util = require('util')
 var stream = require('stream')
 var es = require('event-stream');
+//
+// var shortid = require('shortid');
 
 var lineNr = 0;
 var history;
 
 
+// ROOM
+// id - url
+// password
+//
 
 // app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(__dirname+'/public'));
 app.get('/', function(req,res){
 	res.sendFile(__dirname + 'public/index.html');
+});
+
+app.get('/new' , function(req,res){
+	// var id = shortid.generate();
+	// res.redirect('/'+id);
+	// console.log(req.url);
+	// res.sendFile(__dirname + '/public/index.html');
+});
+
+app.get('/*' , function(req,res){
+	// var id = shortid.generate();
+	// res.redirect('/'+id);
+	// var newUrl = "/" + makeRoomName(req.url);
+	// console.log(req.url);
+	// console.log(newUrl);
+	//
+	// if(newUrl != req.url){
+	// 	res.redirect(newUrl);
+	// 	console.log("MERDA");
+	// 	// console.log("/"+ newUrl);
+	// }
+	if(!rooms.some( _room => "/"+_room.name === req.url )){
+		console.log("NO ROOM così");
+		res.sendFile(__dirname + '/public/404.html');
+	}
+	else {
+		console.log(req.url);
+		res.sendFile(__dirname + '/public/index.html');
+	}
+
 });
 
 http.listen(4000, function(){
@@ -37,6 +73,8 @@ walls = []; // textures of walls
 // 4 = ceiling
 // 5 = floor
 
+rooms = [];
+
 
 Wall = function(w,h,i){ // WALL CLASS
 
@@ -47,7 +85,7 @@ Wall = function(w,h,i){ // WALL CLASS
 	this.number = i;
 	console.log("START " +this.ctx);
 	// this.saveImage();
-	this.readImage(this.ctx,this.number);
+	// this.readImage(this.ctx,this.number);
 }
 
 Wall.prototype.createWall = function(w,h){
@@ -123,82 +161,129 @@ Wall.prototype.draw = function(x,y,brushSize,color,brushType){
 
 function createWalls(){
 
+	var _walls = [];
+
 	var roomWidth = 8;
 	var roomHeight = 4;
 	var roomDepth = 8;
 
 	var wall = new Wall(roomWidth,roomHeight,0);
-	walls.push(wall);
+	_walls.push(wall);
 	var wall = new Wall(roomWidth,roomHeight,1);
-	walls.push(wall);
+	_walls.push(wall);
 
 	var wall = new Wall(roomDepth,roomHeight,2);
-	walls.push(wall);
+	_walls.push(wall);
 	var wall = new Wall(roomDepth,roomHeight,3);
-	walls.push(wall);
+	_walls.push(wall);
 
 	var wall = new Wall(roomWidth,roomDepth,4);
-	walls.push(wall);
+	_walls.push(wall);
 	var wall = new Wall(roomWidth,roomDepth,5);
-	walls.push(wall);
+	_walls.push(wall);
 
 	// console.log(walls);
 	// walls[1].saveImage();
+	return _walls;
 
 }
 
 createWalls();
 
 
-setInterval(function(){
-
-	for(var i=0; i<walls.length; i++){
-		walls[i].saveImage(__dirname + "/textures");
+function createRoom(_name) {
+	var room = {
+		walls : createWalls(),
+		name: makeRoomName(_name),
+		isPrivate: false,
+		password: ""
 	}
+	rooms.push(room);
+	console.log("CREATED " +room.name);
+}
 
-},  60000);
-
-
-setInterval(function(){
-
-	 var time = getDate();
-
-	 var newDir =  __dirname + '/backup/textures_' + time;
-
-	 mkdirp(newDir, function (err) {
-	    if (err) console.error(err)
-	    else{
-				console.log("dir " + newDir + " created");
-				for(var i=0; i<walls.length; i++){
-					walls[i].saveImage(newDir);
-				}
-			}
-		});
-
-
-
-}, 60000 * 60 * 12);
-
-function n(n){
-    return n > 9 ? "" + n: "0" + n;
+function makeRoomName(roomName) {
+	var newName = roomName.replace(/[^a-z0-9]/gi,'');
+	return newName;
 }
 
 
+// setInterval(function(){
+//
+// 	for(var i=0; i<walls.length; i++){
+// 		walls[i].saveImage(__dirname + "/textures");
+// 	}
+//
+// },  60000);
+//
+//
+// setInterval(function(){
+//
+// 	 var time = getDate();
+//
+// 	 var newDir =  __dirname + '/backup/textures_' + time;
+//
+// 	 mkdirp(newDir, function (err) {
+// 	    if (err) console.error(err)
+// 	    else{
+// 				console.log("dir " + newDir + " created");
+// 				for(var i=0; i<walls.length; i++){
+// 					walls[i].saveImage(newDir);
+// 				}
+// 			}
+// 		});
+//
+//
+//
+// }, 60000 * 60 * 12);
+//
+// function n(n){
+//     return n > 9 ? "" + n: "0" + n;
+// }
 
-
+createRoom("");
+createRoom("ciao");
+createRoom("merda");
 
 
 io.on("connection", function(socket){
 
 	console.log(socket.id + " CONNECTED");
-	socket.broadcast.emit("user connection", "user connected: " + socket.id);
-	// console.log(socket.conn);
+	// console.log(socket.request.headers);
+
+	socket.emit("connected");
 
   // CHANGE THIS TO A CLIENT REQUEST
-  for(var i=0; i<walls.length; i++){
-  	socket.emit("updateWall", i,walls[i].canvas.toDataURL());
-  	// console.log("CHISSA");
-  }
+	socket.on("joinRoom", function(room){
+		var validRoom = rooms.find( _room => _room.name === room )
+
+		if(validRoom) {
+
+			for(_room in socket.rooms){
+		    if(socket.id !== _room) socket.leave(_room);
+			}
+			socket.join(room, function(){
+				console.log(socket.rooms);
+				socket.room = validRoom;
+			});
+
+			socket.broadcast.to(room).emit("user connection", "user connected: " + socket.id);
+
+			for(var i=0; i<validRoom.walls.length; i++){
+		  	socket.emit("updateWall", i, validRoom.walls[i].canvas.toDataURL());
+		  	// console.log("CHISSA");
+		  }
+		}
+
+		socket.on("createRoom", function(name) {
+			if(!rooms.some( _room => _room.name === name )){
+					createRoom(name);
+			}
+		})
+
+	});
+
+
 
 	socket.on("disconnect", function(){
 		console.log(socket.id + " disconnected");
@@ -212,16 +297,14 @@ io.on("connection", function(socket){
 		// (x,y,brushSize, color)
 		// console.log("someone is drawing at " + x + " " + y + " brush:" + brushSize + " color " + color);
 		// console.log(brushType);
-		walls[wall].draw(x,y,brushSize,color,brushType);
-		socket.broadcast.emit("draw",wall,x,y,brushSize,color,brushType);
+		if(socket.room) {
+			socket.room.walls[wall].draw(x,y,brushSize,color,brushType);
+			socket.broadcast.to(socket.room.name).emit("draw",wall,x,y,brushSize,color,brushType);
 
-		writeLog(wall,x,y,brushSize,color,brushType);
+			// writeLog(wall,x,y,brushSize,color,brushType);
+		}
 
 	});
-
-	// socket.on("typing", function(name){
-	// 	console.log(name + " is typing");
-	// });
 
 });
 

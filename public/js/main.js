@@ -288,6 +288,7 @@ if (window.DeviceOrientationEvent && 'ontouchstart' in window) {
 }
 
 
+
 // console.log("hash = " + window.location.hash);
 
 // var map = new THREE.TextureLoader().load( "cursor.png" );

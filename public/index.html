@@ -93,6 +93,12 @@
 		<script type="text/javascript">
 			var socket = io();
 
+			socket.on("connected", function(){
+				var room = window.location.pathname.slice(1);
+				console.log(room);
+				socket.emit("joinRoom", room);
+			});
+
 			socket.on("updateWall", function(i,_canvas){
 				can = walls[i].obj.canvas;
 				// console.log(can);
@@ -102,7 +108,7 @@
 			});
 
 			socket.on("draw", function(i,x,y,brushSize,color,brushType){
-				// console.log("someone is drawing on wall " +i);
+				console.log("someone is drawing on wall " +i);
 				drawOnWall(i,x,y,brushSize,color,brushType);
 			});
 
