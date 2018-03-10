@@ -568,6 +568,12 @@ renderer.domElement.addEventListener( 'click', function ( event ) {
 	// cursorLocked = true;
 	hideGui();
 
+}); 
+
+document.querySelector(".create-room").addEventListener( 'click', function ( event ) {
+	var name = document.querySelector(".room-name").value;
+	console.log(name);
+	socket.emit("createRoom", name);
 });
 
 if ("onpointerlockchange" in document) {

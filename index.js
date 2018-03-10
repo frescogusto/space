@@ -15,10 +15,31 @@ var stream = require('stream')
 var es = require('event-stream');
 //
 // var shortid = require('shortid');
+var MongoClient = require('mongodb').MongoClient
+  , assert = require('assert');
+
+// Connection URL
+var url = 'mongodb://localhost:27017/space';
+var db;
+// Use connect method to connect to the server
+MongoClient.connect(url, function(err, _db) {
+  assert.equal(null, err);
+  console.log("Connected successfully to server");
+	db = _db.db("space");
+
+	// db.createCollection("rooms", function(err, res) {
+  //   if (err) throw err;
+  //   console.log("Collection created!");
+  //   // _db.close();
+  // });
+
+
+  // _db.close();
+});
+
 
 var lineNr = 0;
 var history;
-
 
 // ROOM
 // id - url
@@ -27,6 +48,8 @@ var history;
 
 // app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(__dirname+'/public'));
+app.use('/room',  express.static(__dirname + '/public'));
+// app.use(express.static(path.join(__dirname, 'public')));
 app.get('/', function(req,res){
 	res.sendFile(__dirname + 'public/index.html');
 });
@@ -38,26 +61,48 @@ app.get('/new' , function(req,res){
 	// res.sendFile(__dirname + '/public/index.html');
 });
 
-app.get('/*' , function(req,res){
-	// var id = shortid.generate();
-	// res.redirect('/'+id);
-	// var newUrl = "/" + makeRoomName(req.url);
-	// console.log(req.url);
-	// console.log(newUrl);
-	//
-	// if(newUrl != req.url){
-	// 	res.redirect(newUrl);
-	// 	console.log("MERDA");
-	// 	// console.log("/"+ newUrl);
-	// }
-	if(!rooms.some( _room => "/"+_room.name === req.url )){
-		console.log("NO ROOM così");
-		res.sendFile(__dirname + '/public/404.html');
-	}
-	else {
-		console.log(req.url);
-		res.sendFile(__dirname + '/public/index.html');
-	}
+app.get('/rooms' , function(req,res){
+	// db.collection("rooms").find().toArray(function(err,data){
+	// 	res.send(data);
+	// })
+	var data = '<ul>';
+	db.collection("rooms").find().forEach(function(item){
+		// console.log(item);
+		if(item.walls != undefined && item.walls[0] != undefined)
+		data += `<li style="float:left">${item._id}
+		<img width="100" src="${item.walls[0]}"/>
+		<img width="100" src="${item.walls[3]}"/>
+		<img width="100" src="${item.walls[1]}"/>
+		<img width="100" src="${item.walls[2]}"/>
+		</li>`;
+	}, function(err) {
+  // done or error
+		data += '</ul>';
+		res.set('Content-Type', 'text/html');
+		res.send(data);
+	});
+});
+
+app.get('/room/*' , function(req,res){
+
+	var room = req.url.slice(6);
+	room = room.toLowerCase();
+
+	console.log(room);
+	console.log("HEEEIIIIIII------------------");
+	doRoomExist(room, function(exists){
+		console.log(exists);
+		if(exists){
+			console.log("CIAO!!! LA STANZA EISTE");
+			res.sendFile(__dirname + '/public/index.html' );
+		} else {
+			console.log("NON ESISTE STA STANZA! 666666 EMOJI");
+			res.sendFile(__dirname + '/public/404.html' );
+		}
+	})
+	console.log("HEEEIIIIIII--------------");
+
+
 
 });
 
@@ -76,20 +121,31 @@ walls = []; // textures of walls
 rooms = [];
 
 
-Wall = function(w,h,i){ // WALL CLASS
+Wall = function(w,h,i,dataUrl){ // WALL CLASS
 
 	w = w*64;
 	h = h*64;
 	this.canvas = new Canvas(w,h);
 	this.ctx = this.canvas.getContext("2d");
 	this.number = i;
-	console.log("START " +this.ctx);
+	// console.log("START " +this.ctx);
 	// this.saveImage();
 	// this.readImage(this.ctx,this.number);
+	this.loadImage(this.ctx, dataUrl);
 }
 
 Wall.prototype.createWall = function(w,h){
 
+}
+
+Wall.prototype.loadImage = function(ctx, dataUrl) {
+	img = new Image;
+	img.onload = function(){
+			ctx.drawImage(img, 0, 0, img.width, img.height);
+			// console.log("WALL LOADED");
+	};
+	// console.log(dataUrl);
+	img.src = dataUrl;
 }
 
 Wall.prototype.readImage = function(ctx){
@@ -159,7 +215,7 @@ Wall.prototype.draw = function(x,y,brushSize,color,brushType){
 
 
 
-function createWalls(){
+function createWalls(wallsDataUrls){
 
 	var _walls = [];
 
@@ -167,43 +223,80 @@ function createWalls(){
 	var roomHeight = 4;
 	var roomDepth = 8;
 
-	var wall = new Wall(roomWidth,roomHeight,0);
+	// console.log(wallsDataUrls);
+
+	var wall = new Wall(roomWidth,roomHeight,0,wallsDataUrls[0]);
 	_walls.push(wall);
-	var wall = new Wall(roomWidth,roomHeight,1);
+	var wall = new Wall(roomWidth,roomHeight,1,wallsDataUrls[1]);
 	_walls.push(wall);
 
-	var wall = new Wall(roomDepth,roomHeight,2);
+	var wall = new Wall(roomDepth,roomHeight,2,wallsDataUrls[2]);
 	_walls.push(wall);
-	var wall = new Wall(roomDepth,roomHeight,3);
-	_walls.push(wall);
-
-	var wall = new Wall(roomWidth,roomDepth,4);
-	_walls.push(wall);
-	var wall = new Wall(roomWidth,roomDepth,5);
+	var wall = new Wall(roomDepth,roomHeight,3,wallsDataUrls[3]);
 	_walls.push(wall);
 
-	// console.log(walls);
+	var wall = new Wall(roomWidth,roomDepth,4,wallsDataUrls[4]);
+	_walls.push(wall);
+	var wall = new Wall(roomWidth,roomDepth,5,wallsDataUrls[5]);
+	_walls.push(wall);
+
+	// console.log("CIAOOOOO");
+	// console.log(_walls);
 	// walls[1].saveImage();
 	return _walls;
 
 }
 
-createWalls();
+// createWalls();
+function openRoom(room) {
+	room.walls = createWalls(room.walls);
+	console.log("__ROOM OPENED: " + room.name );
+	rooms.push(room);
+}
 
+function closeRoom(name) {
+	var validRoom = rooms.find( _room => _room.name === name )
+	saveRoom(validRoom);
+	var index = rooms.indexOf(validRoom);
+	if (index > -1) {
+    rooms.splice(index, 1);
+	}
+	console.log(name + " ___CLOSED");
+}
+
+function saveRoom(room) {
+	// room.walls =
+	if(room.isClean) return;
+
+	for (var i = 0; i < room.walls.length; i++) {
+		room.walls[i] = room.walls[i].canvas.toDataURL();
+	}
+	db.collection("rooms").save(room, function(err, res) {
+    if (err) throw err;
+    console.log("ROOM SAVED " + res);
+  });
+}
 
 function createRoom(_name) {
 	var room = {
-		walls : createWalls(),
+		_id:makeRoomName(_name),
 		name: makeRoomName(_name),
+		walls : [],
+		users: 0,
 		isPrivate: false,
-		password: ""
+		password: "",
+		isClean: true
 	}
-	rooms.push(room);
+
+	openRoom(room);
+
 	console.log("CREATED " +room.name);
+	console.log(room);
 }
 
 function makeRoomName(roomName) {
 	var newName = roomName.replace(/[^a-z0-9]/gi,'');
+	newName = newName.toLowerCase().substring(0, 32);
 	return newName;
 }
 
@@ -241,14 +334,12 @@ function makeRoomName(roomName) {
 //     return n > 9 ? "" + n: "0" + n;
 // }
 
-createRoom("");
-createRoom("ciao");
-createRoom("merda");
+
 
 
 io.on("connection", function(socket){
 
-	console.log(socket.id + " CONNECTED");
+	// console.log(socket.id + " CONNECTED");
 	// console.log(socket.request.headers);
 
 	socket.emit("connected");
@@ -256,38 +347,76 @@ io.on("connection", function(socket){
   // CHANGE THIS TO A CLIENT REQUEST
 	socket.on("joinRoom", function(room){
 		var validRoom = rooms.find( _room => _room.name === room )
-
-		if(validRoom) {
-
-			for(_room in socket.rooms){
-		    if(socket.id !== _room) socket.leave(_room);
-			}
-			socket.join(room, function(){
-				console.log(socket.rooms);
-				socket.room = validRoom;
-			});
-
+		if(validRoom) { // if room is open
+			connectToRoom(socket, validRoom);
 			socket.broadcast.to(room).emit("user connection", "user connected: " + socket.id);
-
-			for(var i=0; i<validRoom.walls.length; i++){
-		  	socket.emit("updateWall", i, validRoom.walls[i].canvas.toDataURL());
-		  	// console.log("CHISSA");
-		  }
+		}
+		else {
+			db.collection('rooms').find({_id:room}).toArray(function(err, items){
+				// console.log(items[0]);
+				if(items.length>0) {
+					var room = items[0];
+					openRoom(room);
+					connectToRoom(socket, room);
+				}
+			});
 		}
 
-		socket.on("createRoom", function(name) {
-			if(!rooms.some( _room => _room.name === name )){
-					createRoom(name);
-			}
-		})
 
 	});
 
+	socket.on("createRoom", function(name) {
+		name = makeRoomName(name);
+		var existsInDb = false;
+		var dbRoom;
+		db.collection('rooms').find({ _id:name }).toArray(function(err, items){
+			if(items.length>0) {
+				existsInDb = true;
+				dbRoom = items[0];
+			}
+			// console.log(items);
 
+			if(!rooms.some( _room => _room.name === name ) && !existsInDb ){ // if room is not open and is not in db (it doesnt exists)
+				console.log("00000______ROOM DOESNT EXIST___________00000");
+				createRoom(name);
+				socket.emit("joinRoom", name); // tell the client to go to new url
+			}
+			else if(rooms.some( _room => _room.name === name )){
+				console.log("XXXXX______ROOM EXIST AND IS OPEN");
+				var validRoom = rooms.find( _room => _room.name === name )
+				connectToRoom(socket, validRoom);
+				socket.emit("joinRoom", name); // tell the client to go to new url
+			}
+			else if (existsInDb) {
+				console.log("XXXXX______ROOM EXIST IN DATABASE");
+				openRoom(dbRoom);
+				connectToRoom(socket, dbRoom);
+				socket.emit("joinRoom", name); // tell the client to go to new url
+			}
+
+		});
+		console.log("_________creating ROOM");
+
+
+	})
 
 	socket.on("disconnect", function(){
 		console.log(socket.id + " disconnected");
-	});
+	})
+
+	socket.on("disconnecting", function(){
+		// console.log(socket.id + " disconnected");
+		// console.log(socket.room);
+		if(socket.room) {
+
+			var roomConnections = socket.adapter.rooms[socket.room.name].length;
+			console.log(roomConnections);
+			console.log("_____" + socket.id + " DISCONNECTING FROM " + socket.room.name);
+			if(roomConnections <= 1 ){
+					closeRoom(socket.room.name);
+			}
+		}
+	})
 
 	socket.on("drawHistory", function(frameTime,loops){
 		drawHistory(frameTime, loops);
@@ -300,13 +429,45 @@ io.on("connection", function(socket){
 		if(socket.room) {
 			socket.room.walls[wall].draw(x,y,brushSize,color,brushType);
 			socket.broadcast.to(socket.room.name).emit("draw",wall,x,y,brushSize,color,brushType);
-
+			socket.room.isClean = false;
 			// writeLog(wall,x,y,brushSize,color,brushType);
 		}
 
 	});
 
 });
+
+function connectToRoom(socket, room) {
+	var alreadyConnected = false;
+	for(_room in socket.rooms){
+		if(room.name == _room) {
+			alreadyConnected = true;
+			break;
+		}
+		if(socket.id !== _room) socket.leave(_room);
+	}
+	if(alreadyConnected) return;
+
+	socket.join(room.name, function(){
+		socket.room = room;
+		console.log(socket.id + " CONNECTED TO " + socket.room.name);
+	});
+	for(var i=0; i<room.walls.length; i++){
+		socket.emit("updateWall", i, room.walls[i].canvas.toDataURL());
+	}
+}
+
+function getAllRoomMembers(room, _nsp) {
+    var roomMembers = [];
+    var nsp = (typeof _nsp !== 'string') ? '/' : _nsp;
+
+// io.sockets.in(socket.room.name).sockets;
+    for( var member in io.nsps[nsp].adapter.rooms[room] ) {
+        roomMembers.push(member);
+    }
+
+    return roomMembers;
+}
 
 function writeLog(wall, x, y, brushSize, color,brushType) {
 	// var d;
@@ -320,6 +481,23 @@ function writeLog(wall, x, y, brushSize, color,brushType) {
 	fs.appendFile('drawLog.txt', data, function (err) {
 
 	});
+}
+
+function doRoomExist(name, callback) {
+	db.collection('rooms').find({ _id:name }).toArray(function(err, items){
+		var existsInDb;
+		var dbRoom;
+		if(items.length>0) {
+			existsInDb = true;
+			dbRoom = items[0];
+		}
+		var validRoom = rooms.find( _room => _room.name === name );
+		callback(existsInDb || validRoom!=null)
+	})
+}
+
+function isRoomOpen(roomName) {
+
 }
 
 // drawHistory(10);

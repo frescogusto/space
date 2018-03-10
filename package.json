@@ -15,6 +15,7 @@
     "event-stream": "^3.3.4",
     "express": "^4.13.4",
     "mkdirp": "^0.5.1",
+    "mongodb": "^3.0.4",
     "socket.io": "^1.4.6"
   },
   "repository": {

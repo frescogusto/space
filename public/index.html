@@ -56,6 +56,11 @@
 					<li>press <b>I</b> for the color picker</li>
 					<li>press <b>save 360</b> to save shit and share it on facebook shit mark zuckerberg motherfuck</li>
 					<li>press <b>spacebar</b> to come back to this menu</li>
+					<br>
+					<li>
+						<input class="room-name" type="text" name="createRoom" placeholder="type name here" value="">
+						<button class="create-room" type="button" name="button">create room</button>
+					</li>
 				</ul>
 			</div>
 		</div>
@@ -94,9 +99,13 @@
 			var socket = io();
 
 			socket.on("connected", function(){
-				var room = window.location.pathname.slice(1);
+				var room = window.location.pathname.slice(6);
 				console.log(room);
 				socket.emit("joinRoom", room);
+			});
+
+			socket.on("joinRoom", function(url){
+				window.location = "/room/" + url;
 			});
 
 			socket.on("updateWall", function(i,_canvas){
