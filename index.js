@@ -13,6 +13,10 @@ var Image = Canvas.Image;
 var util = require('util')
 var stream = require('stream')
 var es = require('event-stream');
+
+const cluster = require('cluster');
+const numCPUs = require('os').cpus().length;
+
 //
 // var shortid = require('shortid');
 var MongoClient = require('mongodb').MongoClient
@@ -41,6 +45,9 @@ MongoClient.connect(url, function(err, _db) {
 var lineNr = 0;
 var history;
 
+
+console.log(numCPUs);
+
 // ROOM
 // id - url
 // password
@@ -66,14 +73,14 @@ app.get('/rooms' , function(req,res){
 	// 	res.send(data);
 	// })
 	var data = '<ul>';
-	db.collection("rooms").find().forEach(function(item){
+	db.collection("rooms").find().sort({ $natural:-1 }).forEach(function(item){
 		// console.log(item);
 		if(item.walls != undefined && item.walls[0] != undefined)
-		data += `<li style="float:left">${item._id}
-		<img width="100" src="${item.walls[0]}"/>
-		<img width="100" src="${item.walls[3]}"/>
-		<img width="100" src="${item.walls[1]}"/>
-		<img width="100" src="${item.walls[2]}"/>
+		data += `<li style="float:left"><a href="./room/${item.name}">${item.name}
+		<div style="border: 1px solid black; margin:10px;">
+		<img width="100" src="${item.walls[0]}"/><img width="100" src="${item.walls[3]}"/><img width="100" src="${item.walls[1]}"/><img width="100" src="${item.walls[2]}"/>
+		</div>
+		</a>
 		</li>`;
 	}, function(err) {
   // done or error
@@ -279,7 +286,7 @@ function saveRoom(room) {
 
 function createRoom(_name) {
 	var room = {
-		_id:makeRoomName(_name),
+		// _id:makeRoomName(_name),
 		name: makeRoomName(_name),
 		walls : [],
 		users: 0,
@@ -346,13 +353,18 @@ io.on("connection", function(socket){
 
   // CHANGE THIS TO A CLIENT REQUEST
 	socket.on("joinRoom", function(room){
+		if(typeof(room) !== "string") {
+			console.log("not a string");
+			return;
+		}
+
 		var validRoom = rooms.find( _room => _room.name === room )
 		if(validRoom) { // if room is open
 			connectToRoom(socket, validRoom);
 			socket.broadcast.to(room).emit("user connection", "user connected: " + socket.id);
 		}
 		else {
-			db.collection('rooms').find({_id:room}).toArray(function(err, items){
+			db.collection('rooms').find({name:room}).toArray(function(err, items){
 				// console.log(items[0]);
 				if(items.length>0) {
 					var room = items[0];
@@ -366,10 +378,15 @@ io.on("connection", function(socket){
 	});
 
 	socket.on("createRoom", function(name) {
+		if(typeof(name) !== "string") {
+			console.log("not a string");
+			return;
+		}
+
 		name = makeRoomName(name);
 		var existsInDb = false;
 		var dbRoom;
-		db.collection('rooms').find({ _id:name }).toArray(function(err, items){
+		db.collection('rooms').find({ name:name }).toArray(function(err, items){
 			if(items.length>0) {
 				existsInDb = true;
 				dbRoom = items[0];
@@ -426,7 +443,7 @@ io.on("connection", function(socket){
 		// (x,y,brushSize, color)
 		// console.log("someone is drawing at " + x + " " + y + " brush:" + brushSize + " color " + color);
 		// console.log(brushType);
-		if(socket.room) {
+		if(socket.room && socket.room.walls[wall]!=undefined) {
 			socket.room.walls[wall].draw(x,y,brushSize,color,brushType);
 			socket.broadcast.to(socket.room.name).emit("draw",wall,x,y,brushSize,color,brushType);
 			socket.room.isClean = false;
@@ -484,7 +501,7 @@ function writeLog(wall, x, y, brushSize, color,brushType) {
 }
 
 function doRoomExist(name, callback) {
-	db.collection('rooms').find({ _id:name }).toArray(function(err, items){
+	db.collection('rooms').find({ name:name }).toArray(function(err, items){
 		var existsInDb;
 		var dbRoom;
 		if(items.length>0) {
@@ -591,8 +608,8 @@ function drawCircle(context, cx, cy, d) {
 		}
 	var x,y;
 	var r = Math.floor(d/2);
-		for (let i = -r; i<=r; i+=1) {
-				for (let j = -r; j<=r; j+=1) {
+		for (var i = -r; i<=r; i++) {
+				for (var j = -r; j<=r; j++) {
 					x = i;
 					y = j;
 					if(d%2 == 0) {
