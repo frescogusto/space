@@ -10,6 +10,19 @@ var guiOn=false;
 var isMobile = false;
 var mobileControls;
 
+
+
+var brushes = [];
+for (var i = 1; i < 201; i++) {
+
+    let img = new Image;
+		img.onload = function(){
+  			brushes.push(img)
+		};
+		img.src = '/brushes/' + i + '.png';
+
+}
+
 //////
 
 var scene = new THREE.Scene();
@@ -568,7 +581,7 @@ renderer.domElement.addEventListener( 'click', function ( event ) {
 	// cursorLocked = true;
 	hideGui();
 
-}); 
+});
 
 document.querySelector(".create-room").addEventListener( 'click', function ( event ) {
 	var name = document.querySelector(".room-name").value;

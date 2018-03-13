@@ -69,7 +69,9 @@ CanvasTexture.prototype = {
 				this._context2D.fillRect(x-halfsize,y-halfsize,size,size); // SQUARE BRUSH
 		}
 		else if(brushType==1) {
-			drawCircle(this._context2D, x,y,size);
+			// drawCircle(this._context2D, x,y,size);
+			// drawCircleEasy(this._context2D, x,y,size);
+			drawCircleBrush(this._context2D,x,y,size,brushes[size-1],color)
 		}
 
 
@@ -175,4 +177,23 @@ function drawCircle(context, cx, cy, d) {
 
 function drawPixel(context,x,y) {
 	context.fillRect(x,y,1,1);
+}
+
+
+function drawCircleBrush(context,cx,cy,d,_img,color) {
+	canvas = document.createElement('canvas');
+	canvas.width = d;
+	canvas.height = d;
+	var ctx = canvas.getContext('2d');
+	ctx.fillStyle = color;
+	ctx.fillRect(0, 0, canvas.width, canvas.height)
+	ctx.globalCompositeOperation = 'destination-atop';
+	ctx.drawImage(_img, 0, 0);
+
+	var img = new Image(d,d);
+	img.onload = function(){
+		context.drawImage(img,cx-Math.round(d/2),cy-Math.round(d/2));
+	}
+	img.src = canvas.toDataURL();
+
 }

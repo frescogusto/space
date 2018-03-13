@@ -33,7 +33,6 @@ MongoClient.connect(url, function(err, _db) {
   //   // _db.close();
   // });
 
-
   // _db.close();
 });
 
@@ -41,7 +40,19 @@ MongoClient.connect(url, function(err, _db) {
 var lineNr = 0;
 var history;
 
+var brushes = [];
+for (var i = 1; i < 201; i++) {
+  fs.readFile(__dirname + '/brushes/' + i + '.png', function(err, loadedImg) {
+    if (err) throw err; // Fail if the file can't be read.
+    img = new Image;
+		img.onload = function(){
+  			brushes.push(img)
+		};
+		img.src = loadedImg;
 
+  });
+
+}
 
 // ROOM
 // id - url
@@ -128,7 +139,7 @@ Wall = function(w,h,i,dataUrl){ // WALL CLASS
 	w = w*64;
 	h = h*64;
 	this.canvas = new Canvas(w,h);
-	this.ctx = this.canvas.getContext("2d", {alpha: false});
+	this.ctx = this.canvas.getContext("2d");
 	this.number = i;
 	// console.log("START " +this.ctx);
 	// this.saveImage();
@@ -207,7 +218,9 @@ Wall.prototype.draw = function(x,y,brushSize,color,brushType){
 		this.ctx.fillRect(x-halfsize,y-halfsize,brushSize,brushSize); // SQUARE BRUSH
 	}
 	else if(brushType==1) {
-		drawCircle(this.ctx, x,y,brushSize);
+		// drawCircle(this.ctx, x,y,brushSize);
+    // drawCircleEasy(this.ctx, x,y,brushSize);
+    drawCircleBrush(this.ctx,x,y,brushSize,brushes[brushSize-1],color)
 	}
   // this.ctx.beginPath();
   // this.ctx.arc(x,y,halfsize,0,2*Math.PI);
@@ -270,13 +283,24 @@ function saveRoom(room) {
 	// room.walls =
 	if(room.isClean) return;
 
-	for (var i = 0; i < room.walls.length; i++) {
-		room.walls[i] = room.walls[i].canvas.toDataURL();
+	// for (var i = 0; i < room.walls.length; i++) {
+	// 	room.walls[i] = room.walls[i].canvas.toDataURL();
+	// }
+  var wallsSaved = 0;
+  for(let i=0; i<room.walls.length; i++){
+    room.walls[i].canvas.toDataURL(function(err, png){
+      if(err) throw(err);
+      room.walls[i] = png;
+      wallsSaved ++;
+      if(wallsSaved >= room.walls.length) {
+        db.collection("rooms").save(room, function(err, res) {
+          if (err) throw err;
+          console.log("ROOM SAVED " + res);
+        });
+      }
+    });
 	}
-	db.collection("rooms").save(room, function(err, res) {
-    if (err) throw err;
-    console.log("ROOM SAVED " + res);
-  });
+
 }
 
 function createRoom(_name) {
@@ -464,8 +488,13 @@ function connectToRoom(socket, room) {
 		socket.room = room;
 		console.log(socket.id + " CONNECTED TO " + socket.room.name);
 	});
-	for(var i=0; i<room.walls.length; i++){
-		socket.emit("updateWall", i, room.walls[i].canvas.toDataURL());
+
+	for(let i=0; i<room.walls.length; i++){
+		// socket.emit("updateWall", i, room.walls[i].canvas.toDataURL());
+    room.walls[i].canvas.toDataURL(function(err, png){
+      if(err) throw(err);
+      socket.emit("updateWall", i, png);
+    });
 	}
 }
 
@@ -587,7 +616,6 @@ function getDate() {
 
 
 
-
 function drawCircle(context, cx, cy, d) {
 		if(d%2 == 1) {
 			cx-=1;
@@ -624,4 +652,25 @@ function drawCircle(context, cx, cy, d) {
 
 function drawPixel(context,x,y) {
 	context.fillRect(x,y,1,1);
+}
+
+function drawCircleBrush(context,cx,cy,d,_img,color) {
+  // var d = r*2
+  var canvas = new Canvas(d,d);
+  var ctx = canvas.getContext('2d');
+  ctx.fillStyle = color;
+  ctx.fillRect(0, 0, canvas.width, canvas.height)
+  ctx.globalCompositeOperation = 'destination-atop';
+  // console.log(_img);
+  ctx.drawImage(_img, 0, 0);
+
+  var img = new Image(d,d);
+  img.onload = function(){
+    context.drawImage(img,cx-Math.round(d/2),cy-Math.round(d/2) );
+    // console.log(img);
+  }
+  canvas.toDataURL(function(err, png){
+    img.src = png;
+  });
+
 }

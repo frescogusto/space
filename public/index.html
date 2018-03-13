@@ -110,7 +110,8 @@
 			});
 
 			socket.on("updateWall", function(i,_canvas){
-				can = walls[i].obj.canvas;
+				// console.log(i);
+				var can = walls[i].obj.canvas;
 				// console.log(can);
 				// console.log(_canvas);
 				can.loadImage(_canvas);
