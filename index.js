@@ -14,10 +14,6 @@ var util = require('util')
 var stream = require('stream')
 var es = require('event-stream');
 
-const cluster = require('cluster');
-const numCPUs = require('os').cpus().length;
-
-//
 // var shortid = require('shortid');
 var MongoClient = require('mongodb').MongoClient
   , assert = require('assert');
@@ -46,7 +42,6 @@ var lineNr = 0;
 var history;
 
 
-console.log(numCPUs);
 
 // ROOM
 // id - url
@@ -133,7 +128,7 @@ Wall = function(w,h,i,dataUrl){ // WALL CLASS
 	w = w*64;
 	h = h*64;
 	this.canvas = new Canvas(w,h);
-	this.ctx = this.canvas.getContext("2d");
+	this.ctx = this.canvas.getContext("2d", {alpha: false});
 	this.number = i;
 	// console.log("START " +this.ctx);
 	// this.saveImage();
