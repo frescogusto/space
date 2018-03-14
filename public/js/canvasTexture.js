@@ -58,26 +58,17 @@ CanvasTexture.prototype = {
 		size = brushSize;
 		halfsize = Math.round(size/2);
 
-		// for(var i=0; i< brushSize; i++){ // SPRAY BRUSH
-		// 	for(var j=0; j< brushSize; j++){
-		// 		if(Math.random() < 0.2)
-		// 		this._context2D.fillRect(x-halfsize+i,y-halfsize+j,1,1);
-		// 	}
-		// }
-
 		if(brushType == 0) {
 				this._context2D.fillRect(x-halfsize,y-halfsize,size,size); // SQUARE BRUSH
+				this.updateTexture();
 		}
 		else if(brushType==1) {
 			// drawCircle(this._context2D, x,y,size);
-			// drawCircleEasy(this._context2D, x,y,size);
-			drawCircleBrush(this._context2D,x,y,size,brushes[size-1],color)
+			drawCircleBrush(this._context2D,x,y,size,brushes[size-1],color,this)
 		}
 
+		/// REMEMBER TO UPDATE TEXTURE !!!!!!
 
-
-
-		this.updateTexture();
 
 	},
 
@@ -180,7 +171,7 @@ function drawPixel(context,x,y) {
 }
 
 
-function drawCircleBrush(context,cx,cy,d,_img,color) {
+function drawCircleBrush(context,cx,cy,d,_img,color,texture) {
 	canvas = document.createElement('canvas');
 	canvas.width = d;
 	canvas.height = d;
@@ -193,6 +184,7 @@ function drawCircleBrush(context,cx,cy,d,_img,color) {
 	var img = new Image(d,d);
 	img.onload = function(){
 		context.drawImage(img,cx-Math.round(d/2),cy-Math.round(d/2));
+		texture.updateTexture();
 	}
 	img.src = canvas.toDataURL();
 

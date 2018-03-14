@@ -41,15 +41,14 @@ var lineNr = 0;
 var history;
 
 var brushes = [];
-for (var i = 1; i < 201; i++) {
-  fs.readFile(__dirname + '/brushes/' + i + '.png', function(err, loadedImg) {
+for (let i = 0; i < 200; i++) {
+  fs.readFile(__dirname + '/brushes/' + (i+1) + '.png', function(err, loadedImg) {
     if (err) throw err; // Fail if the file can't be read.
-    img = new Image;
+    let img = new Image;
 		img.onload = function(){
-  			brushes.push(img)
+  			brushes[i] = img
 		};
 		img.src = loadedImg;
-
   });
 
 }
@@ -161,48 +160,6 @@ Wall.prototype.loadImage = function(ctx, dataUrl) {
 	img.src = dataUrl;
 }
 
-Wall.prototype.readImage = function(ctx){
-	var t = this;
-	fs.readFile(__dirname + '/textures/wall_' + this.number + '.png', function(err, loadedImg){
-	  if (err) {
-			t.saveImage(__dirname + '/textures');
-			// throw err;
-			return;
-		}
-	  img = new Image;
-		console.log("READ IMAGE " + ctx);
-
-		img.onload = function(){
-				ctx.drawImage(img, 0, 0, img.width, img.height);
-				console.log("image loaded");
-		};
-		img.src = loadedImg;
-
-
-	});
-}
-
-Wall.prototype.saveImage = function(dir){
-	// console.log("SAVE IMAGE "+this.ctx);
-	var out = fs.createWriteStream( dir + '/wall_' + this.number + '.png');
-	var stream = this.canvas.pngStream();
-
-	stream.on('data', function(chunk){
-	  out.write(chunk);
-	});
-
-	stream.on('err',function(err){
-			console.log(err);
-	});
-
-	stream.on('end', function(){
-	  // console.log('saved png');
-		out.end();
-		// this.readImage(i);
-		// this.readImage(this.ctx,this.number);
-	});
-}
-
 Wall.prototype.draw = function(x,y,brushSize,color,brushType){
 
 	x *= this.canvas.width;
@@ -213,6 +170,9 @@ Wall.prototype.draw = function(x,y,brushSize,color,brushType){
 	this.ctx.fillStyle = color;
 	var halfsize = Math.round(brushSize/2);
 
+  if(brushSize<1) brushSize =1;
+  else if(brushSize>200) brushSize = 200;
+
   // this.ctx.fillRect(x-halfsize,y-halfsize,brushSize,brushSize);
 	if(brushType == 0) {
 		this.ctx.fillRect(x-halfsize,y-halfsize,brushSize,brushSize); // SQUARE BRUSH
@@ -222,13 +182,8 @@ Wall.prototype.draw = function(x,y,brushSize,color,brushType){
     // drawCircleEasy(this.ctx, x,y,brushSize);
     drawCircleBrush(this.ctx,x,y,brushSize,brushes[brushSize-1],color)
 	}
-  // this.ctx.beginPath();
-  // this.ctx.arc(x,y,halfsize,0,2*Math.PI);
-  // this.ctx.fill();
 
 }
-
-
 
 function createWalls(wallsDataUrls){
 
@@ -239,6 +194,8 @@ function createWalls(wallsDataUrls){
 	var roomDepth = 8;
 
 	// console.log(wallsDataUrls);
+
+  // createWall(roomWidth,roomHeight,0,wallsDataUrls[0])
 
 	var wall = new Wall(roomWidth,roomHeight,0,wallsDataUrls[0]);
 	_walls.push(wall);
@@ -262,7 +219,7 @@ function createWalls(wallsDataUrls){
 
 }
 
-// createWalls();
+
 function openRoom(room) {
 	room.walls = createWalls(room.walls);
 	console.log("__ROOM OPENED: " + room.name );
