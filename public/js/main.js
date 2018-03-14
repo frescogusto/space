@@ -490,16 +490,8 @@ document.addEventListener( 'mouseup', onDocumentMouseUp, false );
 var render = function () {
 	requestAnimationFrame( render );
 
-	// cube.rotation.x += 0.01;
-	// cube.rotation.y += 0.01;
-	// t += 0.01;
-	// plane.rotation.y = Math.sin(t);
-	// if(isDown){
-	// 	drawAtPoint();
-	// }
 
 updateRaycast();
-
 
 // controls.getObject().position.set(0,0,0);
 

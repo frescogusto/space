@@ -7,6 +7,10 @@ var path = require("path");
 var fs = require("fs");
 var mkdirp = require('mkdirp');
 
+// const redisAdapter = require('socket.io-redis');
+// io.adapter(redisAdapter({ host: 'localhost', port: 6379 }));
+// console.log(io.adapter());
+
 var Canvas = require("canvas");
 var Image = Canvas.Image;
 
@@ -613,20 +617,21 @@ function drawPixel(context,x,y) {
 
 function drawCircleBrush(context,cx,cy,d,_img,color) {
   // var d = r*2
-  var canvas = new Canvas(d,d);
-  var ctx = canvas.getContext('2d');
+  canvas = new Canvas(d,d);
+  ctx = canvas.getContext('2d');
   ctx.fillStyle = color;
   ctx.fillRect(0, 0, canvas.width, canvas.height)
   ctx.globalCompositeOperation = 'destination-atop';
-  // console.log(_img);
   ctx.drawImage(_img, 0, 0);
 
-  var img = new Image(d,d);
-  img.onload = function(){
-    context.drawImage(img,cx-Math.round(d/2),cy-Math.round(d/2) );
-    // console.log(img);
-  }
   canvas.toDataURL(function(err, png){
+    img = new Image(d,d);
+    img.onload = function(){
+      context.drawImage(img,cx-Math.round(d/2),cy-Math.round(d/2) );
+      delete ctx;
+      delete canvas;
+      delete img;
+    }
     img.src = png;
   });
 
