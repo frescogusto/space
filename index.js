@@ -426,7 +426,7 @@ io.on("connection", function(socket){
 		if(socket.room && socket.room.walls[wall]!=undefined) {
 			socket.room.walls[wall].draw(x,y,brushSize,color,brushType);
 			socket.broadcast.to(socket.room.name).emit("draw",wall,x,y,brushSize,color,brushType);
-			socket.room.isClean = false;
+			// socket.room.isClean = false;
 			// writeLog(wall,x,y,brushSize,color,brushType);
 		}
 

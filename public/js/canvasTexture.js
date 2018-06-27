@@ -172,6 +172,7 @@ function drawPixel(context,x,y) {
 
 
 function drawCircleBrush(context,cx,cy,d,_img,color,texture) {
+	if(_img == null || _img == undefined) return;
 	canvas = document.createElement('canvas');
 	canvas.width = d;
 	canvas.height = d;

@@ -13,13 +13,13 @@ var mobileControls;
 
 
 var brushes = [];
-for (var i = 1; i < 201; i++) {
+for (let i = 0; i < 200; i++) {
 
     let img = new Image;
 		img.onload = function(){
-  			brushes.push(img)
+  			brushes[i] = img
 		};
-		img.src = '/brushes/' + i + '.png';
+		img.src = '/brushes/' + (i+1) + '.png';
 
 }
 
