@@ -118,8 +118,6 @@ app.get('/room/*' , function(req,res){
 	})
 	console.log("HEEEIIIIIII--------------");
 
-
-
 });
 
 http.listen(4000, function(){
@@ -427,6 +425,10 @@ io.on("connection", function(socket){
 			socket.room.walls[wall].draw(x,y,brushSize,color,brushType);
 			socket.broadcast.to(socket.room.name).emit("draw",wall,x,y,brushSize,color,brushType);
 			// socket.room.isClean = false;
+      // console.log(socket.room.name);
+      if(socket.room.name == "" || socket.room.name == "popo") {
+        writeLog(socket.room.name, wall,x,y,brushSize,color,brushType);
+      }
 			// writeLog(wall,x,y,brushSize,color,brushType);
 		}
 
@@ -471,7 +473,7 @@ function getAllRoomMembers(room, _nsp) {
     return roomMembers;
 }
 
-function writeLog(wall, x, y, brushSize, color,brushType) {
+function writeLog(roomName, wall, x, y, brushSize, color,brushType) {
 	// var d;
 	// d.wall = wall;
 	// d.x = x;
@@ -480,7 +482,7 @@ function writeLog(wall, x, y, brushSize, color,brushType) {
 	// d.color = color;
 	t = new Date().getTime();
 	var data = t + " " + wall + " " + x + " " + y + " " + brushSize + " " + color + " " + brushType + "\n";
-	fs.appendFile('drawLog.txt', data, function (err) {
+	fs.appendFile(roomName + '_drawLog.txt', data, function (err) {
 
 	});
 }

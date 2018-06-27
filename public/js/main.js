@@ -12,16 +12,16 @@ var mobileControls;
 
 
 
-var brushes = [];
-for (let i = 0; i < 200; i++) {
-
-    let img = new Image;
-		img.onload = function(){
-  			brushes[i] = img
-		};
-		img.src = '/brushes/' + (i+1) + '.png';
-
-}
+// var brushes = [];
+// for (let i = 0; i < 200; i++) {
+//
+//     let img = new Image;
+// 		img.onload = function(){
+//   			brushes[i] = img
+// 		};
+// 		img.src = '/brushes/' + (i+1) + '.png';
+//
+// }
 
 //////
 
@@ -46,7 +46,7 @@ var roomWidth = 8;
 var roomHeight = 4;
 var roomDepth = 8;
 
-var brushType = 0;
+var brushType = 1;
 var brushSize = 10;
 var drawColor = "black";
 var colors = [10];
@@ -182,12 +182,12 @@ function init(){
 			// 	saveCubemap();
 			// 	break;
 
-			case 75: // K
-				setBrushType(0);
-				break;
-			case 76: // L
-				setBrushType(1);
-				break;
+			// case 75: // K
+			// 	setBrushType(0);
+			// 	break;
+			// case 76: // L
+			// 	setBrushType(1);
+			// 	break;
 
 			case 73:
 				setTool(1)
@@ -263,7 +263,6 @@ function init(){
 	document.getElementById("brushSize").addEventListener("input", function() {
 	    // this.textContent = rangeInput.value;
 			setBrushSize(this.value);
-
 			// console.log(this);
 	}, false);
 
@@ -281,7 +280,7 @@ setColor(9,"333333");
 
 controls.getObject().position.set(0,-roomHeight/2 +1,0);
 changeBrushSize(0);
-setBrushType(1);
+setBrushType(0);
 changeColor("000000");
 
 jscolor.installByClassName("jscolor");
@@ -443,7 +442,7 @@ function changeColor(col){
 }
 
 function drawOnWall(i, x,y,brushSize,color,brushType){
-	walls[i].obj.canvas._draw(x,y,brushSize,color,brushType);
+	walls[i].obj.canvas._draw(x,y,brushSize,color,0);
 }
 
 function getPixel(i, x, y){
@@ -573,12 +572,6 @@ renderer.domElement.addEventListener( 'click', function ( event ) {
 	// cursorLocked = true;
 	hideGui();
 
-});
-
-document.querySelector(".create-room").addEventListener( 'click', function ( event ) {
-	var name = document.querySelector(".room-name").value;
-	console.log(name);
-	socket.emit("createRoom", name);
 });
 
 if ("onpointerlockchange" in document) {
